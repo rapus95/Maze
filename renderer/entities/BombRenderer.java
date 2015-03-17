@@ -12,7 +12,7 @@ public class BombRenderer implements EntityRenderer {
 	public void render(Entity entity) {
 		GL11.glTranslated(0, -0.25, 0);
 		GL11.glScaled(0.5 * 0.25, 0.5 * 0.25, 0.5 * 0.25);
-		RenderUtils.renderCube(false);
+		RenderUtils.renderSphere();
 	}
 
 }

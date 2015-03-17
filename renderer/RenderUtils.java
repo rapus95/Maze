@@ -1,6 +1,7 @@
 package renderer;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.util.glu.Sphere;
 
 public class RenderUtils {
 
@@ -98,5 +99,10 @@ public class RenderUtils {
 		GL11.glVertex3f(1.0f, -1.0f, 1.0f);
 		GL11.glVertex3f(1.0f, -1.0f, -1.0f);
 		GL11.glEnd();
+	}
+
+	private static final Sphere s = new Sphere();
+	public static void renderSphere(){
+		s.draw(1, 10, 10);
 	}
 }

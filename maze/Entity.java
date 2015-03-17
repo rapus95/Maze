@@ -72,6 +72,8 @@ public abstract class Entity {
 		double px = ix - x;
 		double py = iy - y;
 		double pz = iz - z;
+		if (pos.withinRectangle(Vec.fromList(ix - 0.5 + size, iy - 0.5 + size, iz - 0.5 + size), Vec.fromList(ix + 0.5 - size, iy + 0.5 - size, iz + 0.5 - size)) && !m.isWall(pos))
+			return;
 		// System.out.println("px:" + px + ", py:" + py + ", x:" + x + ", y:" +
 		// y + ", ix:" + ix + ", iy:" + iy);
 		if (m.isWall(Vec.fromList(ix, iy, iz))) {
@@ -177,11 +179,11 @@ public abstract class Entity {
 		if (thisStatic || otherStatic) {
 			Entity toMove = thisStatic ? other : this;
 			Entity stat = thisStatic ? this : other;
-			toMove.pos = toMove.getPos().sub(stat.getPos()).randomIfPoint().normalize().mul(shouldDist).add(stat.getPos());
+			toMove.pos = toMove.getPos().sub(stat.getPos()).normalizeRandomIfPoint().mul(shouldDist).add(stat.getPos());
 		} else {
 			Vec mid = getPos().add(other.getPos()).div(2);
-			this.pos = this.getPos().sub(mid).randomIfPoint().normalize().mul(shouldDist / 2).add(mid);
-			other.pos = other.getPos().sub(mid).randomIfPoint().normalize().mul(shouldDist / 2).add(mid);
+			this.pos = this.getPos().sub(mid).normalizeRandomIfPoint().mul(shouldDist / 2).add(mid);
+			other.pos = other.getPos().sub(mid).normalizeRandomIfPoint().mul(shouldDist / 2).add(mid);
 		}
 	}
 
