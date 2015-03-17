@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.lwjgl.opengl.GL11;
 
+import math.matrix.IVec;
 import math.matrix.Vec;
 import maze.Block;
 import maze.BlockData;
@@ -36,8 +37,8 @@ public class MazeRenderer {
 	}
 
 	public void render(Maze m) {
-		Vec dimensions = m.getDimensions();
-		Vec pos = m.currentPlayer().getPos();
+		IVec dimensions = m.getDimensions();
+		IVec pos = m.currentPlayer().getPos();
 		long dieAni = m.currentPlayer().getDieAni();
 		if (dieAni == -1)
 			dieAni = 0;
@@ -46,9 +47,9 @@ public class MazeRenderer {
 		int rightXClip = Math.min((int) (dimensions.getComponent(0) + 0.5), (int) (posX + 25.5));
 		int leftZClip = Math.max(0, (int) (posZ - 24.5));
 		int rightZClip = Math.min((int) (dimensions.getComponent(1) + 0.5), (int) (posZ + 25.5));
-		Vec leftEnd = new Vec(leftXClip - 0.5, leftZClip - 0.5), rightEnd = new Vec(rightXClip + 0.5, rightZClip + 0.5);
+		IVec leftEnd = new Vec(leftXClip - 0.5, leftZClip - 0.5), rightEnd = new Vec(rightXClip + 0.5, rightZClip + 0.5);
 		// Blocks
-		Vec currPos;
+		IVec currPos;
 		GL11.glPushMatrix();
 		GL11.glTranslated(-posX, -posY, -posZ);
 		for (int x = leftXClip; x < rightXClip; x++) {

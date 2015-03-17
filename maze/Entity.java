@@ -1,8 +1,13 @@
 package maze;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.util.UUID;
 
+import net.Utils;
 import math.matrix.Mat;
+import math.matrix.PolarVec;
 import math.matrix.Vec;
 
 public abstract class Entity {
@@ -10,16 +15,16 @@ public abstract class Entity {
 	protected Maze m;
 
 	protected Vec pos;
-	protected Vec viewDirection = new Vec(0.0, 0.0).normalize();
+	protected PolarVec viewDirection = PolarVec.fromList(1, Math.PI / 2, 0);
 	protected float speedForward = 0, speedSideward = 0;
 
-	private static final Mat rot = Mat.makeRotMat_Given(2, 90, 0, 1);
+	private static final Mat rot = Mat.makeRotMat_Given(2, -90, 0, 1);
 	private static final Mat dimChanger = new Mat(2, 3);
-	
-	static{
+
+	static {
 		dimChanger.setIdentity(0);
 		dimChanger.setValue(0, 0, 1);
-		dimChanger.setValue(1, 2, 1);
+		dimChanger.setValue(1, 1, 1);
 	}
 
 	private boolean isStatic;
@@ -33,18 +38,31 @@ public abstract class Entity {
 			this.pos = new Vec(2);
 	}
 
+	public Entity(Maze m, DataInputStream dataInputStream) throws IOException {
+		this.m = m;
+		this.pos = new Vec(2);
+		readSync(dataInputStream);
+	}
+
 	public Vec getPos() {
 		return pos;
 	}
 
-	public Vec getViewDirection() {
+	public PolarVec getViewDirection() {
 		return viewDirection;
+	}
+	
+	public void setViewDirection(PolarVec v) {
+		this.viewDirection = v.clone();
 	}
 
 	public void tick(long timeDelta) {
-		Vec viewDirection = dimChanger.mul(this.viewDirection = this.viewDirection.normalize()).normalize();
-		
-		pos = pos.addWithMultiplier(viewDirection, speedForward * timeDelta / 1000d / 1000 / 1000).addWithMultiplier(rot.mul(viewDirection), speedSideward * timeDelta / 1000d / 1000 / 1000);
+//		System.out.println(this.viewDirection);
+//		System.out.println(this.viewDirection.toVec());
+//		System.out.println(dimChanger.mul(this.viewDirection.toVec()));
+		Vec viewDirection = dimChanger.mul(this.viewDirection.toVec()).normalize();
+//		System.out.println(viewDirection);
+		pos = pos.addWithMultiplier(rot.mul(viewDirection), speedForward * timeDelta / 1000d / 1000 / 1000).addWithMultiplier(viewDirection, speedSideward * timeDelta / 1000d / 1000 / 1000);
 	}
 
 	public void moveOutOfWall() {
@@ -165,6 +183,18 @@ public abstract class Entity {
 
 	public boolean isDead() {
 		return false;
+	}
+
+	public void writeSync(DataOutputStream dataOutputStream) {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void readSync(DataInputStream dataInputStream) throws IOException {
+		Utils.readVec(dataInputStream, this.pos);
+		Utils.readVec(dataInputStream, this.viewDirection);
+		this.speedForward = dataInputStream.readFloat();
+		this.speedSideward = dataInputStream.readFloat();
 	}
 
 }

@@ -1,11 +1,11 @@
 package maze;
 
-import math.matrix.Vec;
+import math.matrix.IVec;
 import maze.entities.Bomb;
 
 public class Block {
 
-	public double onExplode(BlockData blockData, Bomb bomb, Vec pos, double remaining) {
+	public double onExplode(BlockData blockData, Bomb bomb, IVec pos, double remaining) {
 		return remaining;
 	}
 

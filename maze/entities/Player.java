@@ -13,9 +13,9 @@ public class Player extends Entity {
 
 	private int currBombAmount;
 
-	private int bombAmount = 100;
+	private int bombAmount = 1;
 
-	private int bombPower = 10;
+	private int bombPower = 1;
 
 	private Vec startPos;
 
@@ -31,7 +31,7 @@ public class Player extends Entity {
 			return;
 		if (currBombAmount >= bombAmount)
 			return;
-		m.spawnEntity(new Bomb(m, pos, this, bombPower, 10));
+		m.spawnEntity(new Bomb(m, pos, this, bombPower, 4));
 		currBombAmount++;
 	}
 
@@ -49,6 +49,10 @@ public class Player extends Entity {
 			return true;
 		if (other instanceof Explosion)
 			die();
+		if(other instanceof Bomb){
+			other.setViewDirection(this.viewDirection);
+			other.setForwardSpeed(Math.max(1, this.speedForward));
+		}
 		return super.onEntityCollide(other);
 	}
 
