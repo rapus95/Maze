@@ -62,6 +62,7 @@ public abstract class Entity {
 	public void moveOutOfWall() {
 		if (!canCollideWithWall())
 			return;
+		
 		double size = getSize();
 		double x = pos.getComponent(0);
 		double y = pos.getComponent(1);
