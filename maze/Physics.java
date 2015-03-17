@@ -19,10 +19,13 @@ public class Physics {
 		double c = v1_x * (v2_y - v3_y) + v2_x * (v3_y - v1_y) + v3_x * (v1_y - v2_y);
 		double d = -(v1_x * (v2_y * v3_z - v3_y * v2_z) + v2_x * (v3_y * v1_z - v1_y * v3_z) + v3_x * (v1_y * v2_z - v2_y * v1_z));
 		double planeDist = (a * point.getComponent(0) + b * point.getComponent(1) + c * point.getComponent(2) + d) / Math.sqrt(a * a + b * b + c * c);
+		// System.out.println("Dist:"+planeDist);
 		if (Math.abs(planeDist) >= dist) {
 			return null;
 		}
 		Vec planePoint = point.sub(Vec.fromList(a, b, c).mul(planeDist));
+		if(planePoint==planePoint)
+			return planePoint;
 		Vec s = p2.sub(p1);
 		Vec t = p3.sub(p1);
 		double m1, m2;
@@ -60,7 +63,8 @@ public class Physics {
 				planePoint = planePoint.sub(t.mul(m2));
 			}
 		}
-		if (m1 > 0 && m2 > 0 && m1 + m2 < 1) {
+		if (-1 < m1 + m2 && m1 + m2 < 1) {
+			System.out.println("m:" + m1 + ";" + m2);
 			return p1.add(s.mul(m1)).add(t.mul(m2));
 		}
 		return null;

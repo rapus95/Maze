@@ -10,7 +10,7 @@ public class AirRenderer implements BlockRenderer {
 
 	@Override
 	public void render(BlockData block) {
-		if(block.vec.getComponent(2)>0)
+		/*if(block.vec.getComponent(2)>0)
 			return;
 		GL11.glColor3d(0.5, 0.5, 0);
 		GL11.glBegin(GL11.GL_QUADS);
@@ -18,7 +18,7 @@ public class AirRenderer implements BlockRenderer {
 		GL11.glVertex3d(+0.5, -0.5, -0.5);
 		GL11.glVertex3d(+0.5, -0.5, +0.5);
 		GL11.glVertex3d(-0.5, -0.5, +0.5);
-		GL11.glEnd();
+		GL11.glEnd();*/
 	}
 
 }

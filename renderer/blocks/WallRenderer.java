@@ -12,7 +12,7 @@ public class WallRenderer implements BlockRenderer {
 	@Override
 	public void render(BlockData block) {
 		GL11.glScalef(0.5f, 0.5f, 0.5f);
-		RenderUtils.renderCube(true);
+		RenderUtils.renderCubeBuffers(true);
 	}
 
 }

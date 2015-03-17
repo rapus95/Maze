@@ -5,10 +5,12 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.UUID;
 
-import net.Utils;
+import org.lwjgl.opengl.GL11;
+
 import math.matrix.Mat;
 import math.matrix.PolarVec;
 import math.matrix.Vec;
+import net.Utils;
 
 public abstract class Entity {
 
@@ -59,10 +61,93 @@ public abstract class Entity {
 		pos = pos.addWithMultiplier(rot.mul(viewDirection), speedForward * timeDelta / 1000_000_000d).addWithMultiplier(viewDirection, speedSideward * timeDelta / 1000_000_000d);
 	}
 
+	// public void moveOutOfWall() {
+	// if (!canCollideWithWall())
+	// return;
+	//
+	// double size = getSize();
+	// double x = pos.getComponent(0);
+	// double y = pos.getComponent(1);
+	// double z = pos.getComponent(2);
+	// int ix = (int) Math.floor(x + 0.5);
+	// int iy = (int) Math.floor(y + 0.5);
+	// int iz = (int) Math.floor(z + 0.5);
+	// double px = ix - x;
+	// double py = iy - y;
+	// double pz = iz - z;
+	// if (pos.withinRectangle(Vec.fromList(ix - 0.5 + size, iy - 0.5 + size, iz
+	// - 0.5 + size), Vec.fromList(ix + 0.5 - size, iy + 0.5 - size, iz + 0.5 -
+	// size)) && !m.isWall(pos))
+	// return;
+	// // System.out.println("px:" + px + ", py:" + py + ", x:" + x + ", y:" +
+	// // y + ", ix:" + ix + ", iy:" + iy);
+	// if (m.isWall(Vec.fromList(ix, iy, iz))) {
+	// if (Math.abs(px) < Math.abs(py) && Math.abs(pz) < Math.abs(py)) {
+	// if (py > 0) {
+	// y = iy - 0.5 - size;
+	// } else {
+	// y = iy + 0.5 + size;
+	// }
+	// pos.setComponent(1, y);
+	// } else if (Math.abs(pz) < Math.abs(px)) {
+	// if (px > 0) {
+	// x = ix - 0.5 - size;
+	// } else {
+	// x = ix + 0.5 + size;
+	// }
+	// pos.setComponent(0, x);
+	// } else {
+	// if (pz > 0) {
+	// z = iz - 0.5 - size;
+	// } else {
+	// z = iz + 0.5 + size;
+	// }
+	// pos.setComponent(2, z);
+	// }
+	// } else {
+	// double l;
+	// if (px < -0.5 + size && m.isWall(Vec.fromList(ix + 1, iy, iz))) {
+	// pos.setComponent(0, ix + 0.5 - size);
+	// if (py < -0.5 + size && m.isWall(Vec.fromList(ix, iy + 1, iz))) {
+	// pos.setComponent(1, iy + 0.5 - size);
+	// } else if (py > 0.5 - size && m.isWall(Vec.fromList(ix, iy - 1, iz))) {
+	// pos.setComponent(1, iy - 0.5 + size);
+	// }
+	// } else if (px > 0.5 - size && m.isWall(Vec.fromList(ix - 1, iy, iz))) {
+	// pos.setComponent(0, ix - 0.5 + size);
+	// if (py < -0.5 + size && m.isWall(Vec.fromList(ix, iy + 1, iz))) {
+	// pos.setComponent(1, iy + 0.5 - size);
+	// } else if (py > 0.5 - size && m.isWall(Vec.fromList(ix, iy - 1, iz))) {
+	// pos.setComponent(1, iy - 0.5 + size);
+	// }
+	// } else if (py < -0.5 + size && m.isWall(Vec.fromList(ix, iy + 1, iz))) {
+	// pos.setComponent(1, iy + 0.5 - size);
+	// } else if (py > 0.5 - size && m.isWall(Vec.fromList(ix, iy - 1, iz))) {
+	// pos.setComponent(1, iy - 0.5 + size);
+	// } else if ((l = l(px, py, -0.5, -0.5)) < size && m.isWall(Vec.fromList(ix
+	// + 1, iy + 1, iz))) {
+	// pos.setComponent(0, ix + 0.5 - (px + 0.5) / l * size);
+	// pos.setComponent(1, iy + 0.5 - (py + 0.5) / l * size);
+	// } else if ((l = l(px, py, 0.5, -0.5)) < size && m.isWall(Vec.fromList(ix
+	// - 1, iy + 1, iz))) {
+	// pos.setComponent(0, ix - 0.5 - (px - 0.5) / l * size);
+	// pos.setComponent(1, iy + 0.5 - (py + 0.5) / l * size);
+	// } else if ((l = l(px, py, 0.5, 0.5)) < size && m.isWall(Vec.fromList(ix -
+	// 1, iy - 1, iz))) {
+	// pos.setComponent(0, ix - 0.5 - (px - 0.5) / l * size);
+	// pos.setComponent(1, iy - 0.5 - (py - 0.5) / l * size);
+	// } else if ((l = l(px, py, -0.5, 0.5)) < size && m.isWall(Vec.fromList(ix
+	// + 1, iy - 1, iz))) {
+	// pos.setComponent(0, ix + 0.5 - (px + 0.5) / l * size);
+	// pos.setComponent(1, iy - 0.5 - (py - 0.5) / l * size);
+	// }
+	// }
+	// }
+
 	public void moveOutOfWall() {
 		if (!canCollideWithWall())
 			return;
-		
+
 		double size = getSize();
 		double x = pos.getComponent(0);
 		double y = pos.getComponent(1);
@@ -70,77 +155,89 @@ public abstract class Entity {
 		int ix = (int) Math.floor(x + 0.5);
 		int iy = (int) Math.floor(y + 0.5);
 		int iz = (int) Math.floor(z + 0.5);
-		double px = ix - x;
-		double py = iy - y;
-		double pz = iz - z;
 		if (pos.withinRectangle(Vec.fromList(ix - 0.5 + size, iy - 0.5 + size, iz - 0.5 + size), Vec.fromList(ix + 0.5 - size, iy + 0.5 - size, iz + 0.5 - size)) && !m.isWall(pos))
 			return;
-		// System.out.println("px:" + px + ", py:" + py + ", x:" + x + ", y:" +
-		// y + ", ix:" + ix + ", iy:" + iy);
-		if (m.isWall(Vec.fromList(ix, iy, iz))) {
-			if (Math.abs(px) < Math.abs(py) && Math.abs(pz) < Math.abs(py)) {
-				if (py > 0) {
-					y = iy - 0.5 - size;
-				} else {
-					y = iy + 0.5 + size;
+		Vec v = new Vec(3), tmp;
+		for (int i = -1; i <= 1; i++) {
+			for (int j = -1; j <= 1; j++) {
+				// for (int k = -1; k <= 1; k++) {
+				if (m.isWall(tmp = pos.add(Vec.fromList(i, j, 0)))) {
+					tmp = tmp.round();
+					Vec xnynzn = tmp.add(Vec.fromList(-0.5, -0.5, -0.5));
+					Vec xpynzn = tmp.add(Vec.fromList(0.5, -0.5, -0.5));
+					Vec xnypzn = tmp.add(Vec.fromList(-0.5, 0.5, -0.5));
+					Vec xpypzn = tmp.add(Vec.fromList(0.5, 0.5, -0.5));
+					Vec xnynzp = tmp.add(Vec.fromList(-0.5, -0.5, 0.5));
+					Vec xpynzp = tmp.add(Vec.fromList(0.5, -0.5, 0.5));
+					Vec xnypzp = tmp.add(Vec.fromList(-0.5, 0.5, 0.5));
+					Vec xpypzp = tmp.add(Vec.fromList(0.5, 0.5, 0.5));
+					// System.out.println("Test at:" + tmp + "@" + pos);
+					v = v.add(wietereFunktion(xnynzn, xnypzn, xpypzn, xpynzn));
+					v = v.add(wietereFunktion(xnynzp, xpynzp, xpypzp, xnypzp));
+					v = v.add(wietereFunktion(xnynzn, xnynzp, xnypzp, xnypzn));
+					v = v.add(wietereFunktion(xpynzn, xpypzn, xpypzp, xpynzp));
+					v = v.add(wietereFunktion(xnynzn, xpynzn, xpynzp, xnynzp));
+					v = v.add(wietereFunktion(xnypzn, xnypzp, xpypzp, xpypzn));
 				}
-				pos.setComponent(1, y);
-			} else if (Math.abs(pz) < Math.abs(px)) {
-				if (px > 0) {
-					x = ix - 0.5 - size;
-				} else {
-					x = ix + 0.5 + size;
-				}
-				pos.setComponent(0, x);
-			} else {
-				if (pz > 0) {
-					z = iz - 0.5 - size;
-				} else {
-					z = iz + 0.5 + size;
-				}
-				pos.setComponent(2, z);
-			}
-		} else {
-			double l;
-			if (px < -0.5 + size && m.isWall(Vec.fromList(ix + 1, iy, iz))) {
-				pos.setComponent(0, ix + 0.5 - size);
-				if (py < -0.5 + size && m.isWall(Vec.fromList(ix, iy + 1, iz))) {
-					pos.setComponent(1, iy + 0.5 - size);
-				} else if (py > 0.5 - size && m.isWall(Vec.fromList(ix, iy - 1, iz))) {
-					pos.setComponent(1, iy - 0.5 + size);
-				}
-			} else if (px > 0.5 - size && m.isWall(Vec.fromList(ix - 1, iy, iz))) {
-				pos.setComponent(0, ix - 0.5 + size);
-				if (py < -0.5 + size && m.isWall(Vec.fromList(ix, iy + 1, iz))) {
-					pos.setComponent(1, iy + 0.5 - size);
-				} else if (py > 0.5 - size && m.isWall(Vec.fromList(ix, iy - 1, iz))) {
-					pos.setComponent(1, iy - 0.5 + size);
-				}
-			} else if (py < -0.5 + size && m.isWall(Vec.fromList(ix, iy + 1, iz))) {
-				pos.setComponent(1, iy + 0.5 - size);
-			} else if (py > 0.5 - size && m.isWall(Vec.fromList(ix, iy - 1, iz))) {
-				pos.setComponent(1, iy - 0.5 + size);
-			} else if ((l = l(px, py, -0.5, -0.5)) < size && m.isWall(Vec.fromList(ix + 1, iy + 1, iz))) {
-				pos.setComponent(0, ix + 0.5 - (px + 0.5) / l * size);
-				pos.setComponent(1, iy + 0.5 - (py + 0.5) / l * size);
-			} else if ((l = l(px, py, 0.5, -0.5)) < size && m.isWall(Vec.fromList(ix - 1, iy + 1, iz))) {
-				pos.setComponent(0, ix - 0.5 - (px - 0.5) / l * size);
-				pos.setComponent(1, iy + 0.5 - (py + 0.5) / l * size);
-			} else if ((l = l(px, py, 0.5, 0.5)) < size && m.isWall(Vec.fromList(ix - 1, iy - 1, iz))) {
-				pos.setComponent(0, ix - 0.5 - (px - 0.5) / l * size);
-				pos.setComponent(1, iy - 0.5 - (py - 0.5) / l * size);
-			} else if ((l = l(px, py, -0.5, 0.5)) < size && m.isWall(Vec.fromList(ix + 1, iy - 1, iz))) {
-				pos.setComponent(0, ix + 0.5 - (px + 0.5) / l * size);
-				pos.setComponent(1, iy - 0.5 - (py - 0.5) / l * size);
+				// }
 			}
 		}
+		// System.out.println(v);
+		this.pos = pos.sub(v);
 	}
 
-	private static double l(double x1, double y1, double x2, double y2) {
-		x1 -= x2;
-		y1 -= y2;
-		return Math.sqrt(x1 * x1 + y1 * y1);
+	private static final Mat YZSWAP = new Mat(3, 3);
+
+	static {
+		YZSWAP.setIdentity(0);
+		YZSWAP.setValue(0, 0, 0.5);
+		YZSWAP.setValue(2, 1, 0.5);
+		YZSWAP.setValue(1, 2, -0.5);
 	}
+
+	private Vec wietereFunktion(Vec p1, Vec p2, Vec p3, Vec p4) {
+		Vec n = p2.sub(p1).cross(p3.sub(p1)).normalize();
+		Vec center = p1.add(p2).add(p3).div(3);
+		GL11.glColor3d(0, 0, 0);
+		GL11.glBegin(GL11.GL_LINES);
+		GL11.glVertex3(center.asTmpDoubleBuffer(true));
+		GL11.glVertex3(center.add(n).asTmpDoubleBuffer(true));
+		GL11.glEnd();
+		double size = getSize();
+		Vec pos = getPos();
+		Vec v = Physics.intersect(p1, p2, p3, pos, size);
+		Vec v2 = Physics.intersect(p1, p3, p4, pos, size);
+		double d1 = size, d2;
+		if (v != null) {
+			System.out.println("Dist1:" + d1);
+			d2 = v.distanceTo(pos);
+			if (d1 > d2) {
+				d1 = d2;
+			}
+		}
+		if (v2 != null) {
+			System.out.println("Dist2:" + d1);
+			d2 = v2.distanceTo(pos);
+			if (d1 > d2) {
+				d1 = d2;
+			}
+		}
+		if (d1 < size) {
+			System.out.println("Dist3:" + d1);
+			return n.mul(-(size - d1));
+		}
+		return new Vec(3);
+		// Vec v3 = v == null ? new Vec(3) :
+		// v.sub(pos).normalizeToLength(size).sub(v.sub(pos));
+		// if (v2 != null)
+		// v3 = v3.add(v2.sub(pos).normalizeToLength(size).sub(v2.sub(pos)));
+		// if (v != null || v2 != null)
+		// System.out.println("Intersection@" + v + ":" + v2 + "," + p1 +
+		// "," +
+		// p2 + "," + p3 + "," + p4 + ":" + pos + ":" + v3);
+		// return v3;
+	}
+
 	public void setForwardSpeed(float speed) {
 		this.speedForward = speed;
 	}
@@ -214,7 +311,7 @@ public abstract class Entity {
 	// DOWN.setIdentity(-1);
 	// }
 	public void fall() {
-		pos = pos.add(up.normalizeToLength(0.002));
+		// pos = pos.add(up.normalizeToLength(0.002));
 	}
 
 }

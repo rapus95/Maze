@@ -54,7 +54,7 @@ public class MazeRenderer {
 		GL11.glTranslated(-posX, -posZ, -posY);
 		for (int x = leftXClip; x < rightXClip; x++) {
 			for (int y = leftYClip; y < rightYClip; y++) {
-				for (int z = leftYClip; z < rightYClip; z++) {
+				for (int z = leftZClip; z < rightZClip; z++) {
 					currPos = Vec.fromList(x, y, z);
 					GL11.glPushMatrix();
 					GL11.glTranslated(x, z, y);

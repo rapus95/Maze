@@ -16,7 +16,7 @@ import maze.entities.Bomb;
 import maze.entities.Player;
 
 public class Maze {
-	private BlockData walls[][][] = new BlockData[50][50][5];
+	private BlockData walls[][][] = new BlockData[50][50][1];
 	private Map<UUID, Entity> entities = new HashMap<>();
 	private final List<Entity> entityList = new ArrayList<>();
 	public Player currentPlayer;
@@ -25,12 +25,13 @@ public class Maze {
 
 	public Maze() {
 		// entities[1] = new Player(this, tmp);
-		Maze.fillMaze(walls);
-		Maze.genMaze(walls);
+		Maze.fillMaze(walls, Air.INSTANCE);
+		walls[5][5][0] = new BlockData(Wall.INSTANCE, Vec.fromList(5, 5, 0));
+//		Maze.genMaze(walls);
 		Vec tmp = getNonWall((int) (Math.random() * 100));
 //		System.out.println("here");
 		spawnEntity(currentPlayer = new Player(this, tmp));
-		spawnEntity(new Player(this, tmp));
+//		spawnEntity(new Player(this, tmp));
 //		System.out.println("here");
 	}
 
@@ -84,7 +85,7 @@ public class Maze {
 		if (nextRandomBomb < 0) {
 //			System.out.println("bombPlaced");
 			nextRandomBomb = 5;
-			spawnEntity(new Bomb(this, getNonWall((int) (Math.random() * 100)), null, (int) (Math.random() * 10), (int) (Math.random() * 10) + 10));
+			//spawnEntity(new Bomb(this, getNonWall((int) (Math.random() * 100)), null, (int) (Math.random() * 10), (int) (Math.random() * 10) + 10));
 		}
 		for (int i = 0; i < entityList.size(); i++) {
 			Entity e = entityList.get(i);
@@ -119,11 +120,11 @@ public class Maze {
 		return currentPlayer;
 	}
 
-	public static void fillMaze(BlockData[][][] maze) {
+	public static void fillMaze(BlockData[][][] maze, Block type) {
 		for (int i = 0; i < maze.length; i++) {
 			for (int j = 0; j < maze[i].length; j++) {
 				for (int k = 0; k < maze[i][j].length; k++) {
-					maze[i][j][k] = new BlockData(Wall.INSTANCE, Vec.fromList(i, j, k));
+					maze[i][j][k] = new BlockData(type, Vec.fromList(i, j, k));
 				}
 			}
 		}

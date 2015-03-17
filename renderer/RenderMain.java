@@ -32,6 +32,7 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
 import math.matrix.PolarVec;
+import math.matrix.Vec;
 import maze.Maze;
 import maze.entities.Player;
 
@@ -197,16 +198,23 @@ public class RenderMain {
 		GLFW.glfwSetCursorPos(window, 800 / 2, 600 / 2);
 		while (!shallClose) {
 
-			m.tick(-(lastNanoTime - (lastNanoTime = System.nanoTime())));
 
 			glfwMakeContextCurrent(window);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the
 																// framebuffer
 			glLoadIdentity();
-			m.currentPlayer = (Player) m.getEntities().get(0);
 			PolarVec viewTarget = m.currentPlayer().getViewDirection();
 			GL11.glRotated(Math.toDegrees(viewTarget.getComponent(2)), 1, 0, 0);
 			GL11.glRotated(Math.toDegrees(viewTarget.getComponent(1)), 0, 1, 0);
+			m.currentPlayer = (Player) m.getEntities().get(0);
+			
+			
+			Vec pos = m.currentPlayer().getPos();
+			double posX = pos.getComponent(0), posY = pos.getComponent(1), posZ = pos.getComponent(2);
+			GL11.glPushMatrix();
+			GL11.glTranslated(-posX, -posZ, -posY);
+			m.tick(-(lastNanoTime - (lastNanoTime = System.nanoTime())));
+			GL11.glPopMatrix();
 			mr.render(m);
 			glfwSwapBuffers(window); // swap the color buffers
 
