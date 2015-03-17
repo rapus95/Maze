@@ -32,7 +32,12 @@ public class PacketEntityData extends GamePacket {
 		uuid = entity.id;
 		entityID = entity.getClass().getName();
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		entity.writeSync(new DataOutputStream(out));
+		try {
+			entity.writeSync(new DataOutputStream(out));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		data = out.toByteArray();
 	}
 

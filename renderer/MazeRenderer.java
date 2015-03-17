@@ -3,9 +3,6 @@ package renderer;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.lwjgl.opengl.GL11;
-
-import math.matrix.IVec;
 import math.matrix.Vec;
 import maze.Block;
 import maze.BlockData;
@@ -16,6 +13,9 @@ import maze.blocks.Wall;
 import maze.effects.Explosion;
 import maze.entities.Bomb;
 import maze.entities.Player;
+
+import org.lwjgl.opengl.GL11;
+
 import renderer.blocks.AirRenderer;
 import renderer.blocks.WallRenderer;
 import renderer.entities.BombRenderer;
@@ -37,28 +37,32 @@ public class MazeRenderer {
 	}
 
 	public void render(Maze m) {
-		IVec dimensions = m.getDimensions();
-		IVec pos = m.currentPlayer().getPos();
-		long dieAni = m.currentPlayer().getDieAni();
-		if (dieAni == -1)
-			dieAni = 0;
-		double posX = pos.getComponent(0), posY = dieAni / 1000000000d * 4, posZ = pos.getComponent(1);
-		int leftXClip = Math.max(0, (int) (posX - 24.5));
-		int rightXClip = Math.min((int) (dimensions.getComponent(0) + 0.5), (int) (posX + 25.5));
-		int leftZClip = Math.max(0, (int) (posZ - 24.5));
-		int rightZClip = Math.min((int) (dimensions.getComponent(1) + 0.5), (int) (posZ + 25.5));
-		IVec leftEnd = new Vec(leftXClip - 0.5, leftZClip - 0.5), rightEnd = new Vec(rightXClip + 0.5, rightZClip + 0.5);
+		Vec dimensions = m.getDimensions();
+		Vec pos = m.currentPlayer().getPos();
+		final int renderDistance = 15;
+		double posX = pos.getComponent(0), posY = pos.getComponent(1), posZ = pos.getComponent(2);
+		int leftXClip = Math.max(0, (int) (posX - renderDistance + 0.5));
+		int rightXClip = Math.min((int) (dimensions.getComponent(0) + 0.5), (int) (posX + renderDistance + 0.5));
+		int leftYClip = Math.max(0, (int) (posY - renderDistance + 0.5));
+		int rightYClip = Math.min((int) (dimensions.getComponent(1) + 0.5), (int) (posY + renderDistance + 0.5));
+		int leftZClip = Math.max(0, (int) (posZ - renderDistance + 0.5));
+		int rightZClip = Math.min((int) (dimensions.getComponent(2) + 0.5), (int) (posZ + renderDistance + 0.5));
+		Vec leftEnd = new Vec(leftXClip - 0.5, leftYClip - 0.5, leftZClip - 0.5), rightEnd = new Vec(rightXClip + 0.5, rightYClip + 0.5, rightZClip + 0.5);
 		// Blocks
-		IVec currPos;
+		Vec currPos;
 		GL11.glPushMatrix();
-		GL11.glTranslated(-posX, -posY, -posZ);
+		GL11.glTranslated(-posX, -posZ, -posY);
 		for (int x = leftXClip; x < rightXClip; x++) {
-			for (int z = leftZClip; z < rightZClip; z++) {
-				currPos = new Vec((double) x, z);
-				GL11.glPushMatrix();
-				GL11.glTranslated(x, 0, z);
-				renderBlock(m.get(currPos));
-				GL11.glPopMatrix();
+			for (int y = leftYClip; y < rightYClip; y++) {
+				for (int z = leftYClip; z < rightYClip; z++) {
+					currPos = Vec.fromList(x, y, z);
+					GL11.glPushMatrix();
+					GL11.glTranslated(x, z, y);
+					renderBlock(m.get(currPos));
+					if(!currPos.distanceToSmaller(m.get(currPos).vec, 1))
+						System.out.println("WARNING!!!" + currPos + ":" + m.get(currPos).vec);
+					GL11.glPopMatrix();
+				}
 			}
 		}
 		// Entities
@@ -66,7 +70,7 @@ public class MazeRenderer {
 		for (Entity e : m.getEntities()) {
 			if (e.getPos().withinRectangle(leftEnd, rightEnd)) {
 				GL11.glPushMatrix();
-				GL11.glTranslated(e.getPos().getComponent(0), 0, e.getPos().getComponent(1));
+				GL11.glTranslated(e.getPos().getComponent(0), e.getPos().getComponent(2), e.getPos().getComponent(1));
 				renderEntity(e);
 				GL11.glPopMatrix();
 			}

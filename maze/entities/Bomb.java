@@ -44,9 +44,9 @@ public class Bomb extends Entity {
 			return;
 		}
 		m.spawnEntity(new Explosion(m, this.pos));
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < pos.getDimensionCount(); i++) {
 			double remaining = p;
-			Vec off = new Vec(2);
+			Vec off = new Vec(pos.getDimensionCount());
 			off.setComponent(i, 1);
 			Vec pos = this.pos;
 			while(remaining-->0){

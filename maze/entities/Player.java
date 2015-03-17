@@ -57,8 +57,7 @@ public class Player extends Entity {
 	}
 
 	private void die() {
-		dieAni = 0;
-		// this.pos = this.startPos;
+		this.pos = this.startPos;
 	}
 
 	@Override

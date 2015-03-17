@@ -48,7 +48,7 @@ public class RenderMain {
 
 	private GLFWErrorCallback errorCallback;
 
-	private boolean multiplayer = true;
+	private boolean multiplayer = false;
 
 	private boolean shallClose = false;
 
