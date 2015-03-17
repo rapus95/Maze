@@ -24,7 +24,7 @@ public class Physics {
 			return null;
 		}
 		Vec planePoint = point.sub(Vec.fromList(a, b, c).mul(planeDist));
-		if(planePoint==planePoint)
+		if (planePoint == planePoint)
 			return planePoint;
 		Vec s = p2.sub(p1);
 		Vec t = p3.sub(p1);
@@ -67,6 +67,22 @@ public class Physics {
 			System.out.println("m:" + m1 + ";" + m2);
 			return p1.add(s.mul(m1)).add(t.mul(m2));
 		}
+		return null;
+	}
+
+	public static Vec intersect2(Vec p1, Vec p2, Vec p3, Vec point, double dist) {
+		Vec s = p2.sub(p1);
+		Vec t = p3.sub(p1);
+		Vec n = s.cross(t);
+		Vec p = point.sub(p1);
+
+		double d = n.dot(p);
+		double t_1 = s.dot(p);
+		double t_2 = t.dot(p);
+		if (Math.abs(d) >= dist)
+			return null;
+		if (t_1 > 0 && t_2 > 0 && t_1 + t_2 < 1)
+			return point;
 		return null;
 	}
 

@@ -205,8 +205,8 @@ public abstract class Entity {
 		GL11.glEnd();
 		double size = getSize();
 		Vec pos = getPos();
-		Vec v = Physics.intersect(p1, p2, p3, pos, size);
-		Vec v2 = Physics.intersect(p1, p3, p4, pos, size);
+		Vec v = Physics.intersect2(p1, p2, p3, pos, size);
+		Vec v2 = Physics.intersect2(p1, p3, p4, pos, size);
 		double d1 = size, d2;
 		if (v != null) {
 			System.out.println("Dist1:" + d1);
