@@ -58,7 +58,8 @@ public abstract class Entity {
 		Vec viewDirection = this.viewDirection.toVec();
 		viewDirection.setComponent(2, 0);
 		// System.out.println(viewDirection);
-		pos = pos.addWithMultiplier(rot.mul(viewDirection), speedForward * timeDelta / 1000_000_000d).addWithMultiplier(viewDirection, speedSideward * timeDelta / 1000_000_000d);
+		pos = pos.addWithMultiplier(rot.mul(viewDirection), speedForward * timeDelta / 1000_000_000d).addWithMultiplier(viewDirection,
+				speedSideward * timeDelta / 1000_000_000d);
 	}
 
 	// public void moveOutOfWall() {
@@ -155,7 +156,9 @@ public abstract class Entity {
 		int ix = (int) Math.floor(x + 0.5);
 		int iy = (int) Math.floor(y + 0.5);
 		int iz = (int) Math.floor(z + 0.5);
-		if (pos.withinRectangle(Vec.fromList(ix - 0.5 + size, iy - 0.5 + size, iz - 0.5 + size), Vec.fromList(ix + 0.5 - size, iy + 0.5 - size, iz + 0.5 - size)) && !m.isWall(pos))
+		if (pos.withinRectangle(Vec.fromList(ix - 0.5 + size, iy - 0.5 + size, iz - 0.5 + size),
+				Vec.fromList(ix + 0.5 - size, iy + 0.5 - size, iz + 0.5 - size))
+				&& !m.isWall(pos))
 			return;
 		Vec v = new Vec(3), tmp;
 		int num = 0;
@@ -174,32 +177,32 @@ public abstract class Entity {
 					Vec xpypzp = tmp.add(Vec.fromList(0.5, 0.5, 0.5));
 					// System.out.println("Test at:" + tmp + "@" + pos);
 					tmp = shortestDistanceToRectangle(xnynzn, xnypzn, xpypzn, xpynzn);
-					if(tmp!=null){
+					if (tmp != null) {
 						v = v.add(tmp);
 						num++;
 					}
 					tmp = shortestDistanceToRectangle(xnynzp, xpynzp, xpypzp, xnypzp);
-					if(tmp!=null){
+					if (tmp != null) {
 						v = v.add(tmp);
 						num++;
 					}
 					tmp = shortestDistanceToRectangle(xnynzn, xnynzp, xnypzp, xnypzn);
-					if(tmp!=null){
+					if (tmp != null) {
 						v = v.add(tmp);
 						num++;
 					}
 					tmp = shortestDistanceToRectangle(xpynzn, xpypzn, xpypzp, xpynzp);
-					if(tmp!=null){
+					if (tmp != null) {
 						v = v.add(tmp);
 						num++;
 					}
 					tmp = shortestDistanceToRectangle(xnynzn, xpynzn, xpynzp, xnynzp);
-					if(tmp!=null){
+					if (tmp != null) {
 						v = v.add(tmp);
 						num++;
 					}
 					tmp = shortestDistanceToRectangle(xnypzn, xnypzp, xpypzp, xpypzn);
-					if(tmp!=null){
+					if (tmp != null) {
 						v = v.add(tmp);
 						num++;
 					}
@@ -208,51 +211,52 @@ public abstract class Entity {
 			}
 		}
 		// System.out.println(v);
-		if(num>0){
+		if (num > 0) {
 			this.pos = pos.sub(v.div(num));
 		}
 	}
 
 	private Vec shortestDistanceToRectangle(Vec p1, Vec p2, Vec p3, Vec p4) {
 		Vec n = p2.sub(p1).cross(p3.sub(p1)).normalize();
-//		Vec center = p1.add(p2).add(p3).div(3);
-//		GL11.glColor3d(0, 0, 0);
-//		GL11.glBegin(GL11.GL_LINES);
-//		GL11.glVertex3(center.asTmpDoubleBuffer(true));
-//		GL11.glVertex3(center.add(n).asTmpDoubleBuffer(true));
-//		GL11.glEnd();
+		// Vec center = p1.add(p2).add(p3).div(3);
+		// GL11.glColor3d(0, 0, 0);
+		// GL11.glBegin(GL11.GL_LINES);
+		// GL11.glVertex3(center.asTmpDoubleBuffer(true));
+		// GL11.glVertex3(center.add(n).asTmpDoubleBuffer(true));
+		// GL11.glEnd();
 		double size = getSize();
 		Vec pos = getPos();
-//		Vec v = Physics.intersect2(p1, p2, p3, pos, size, size/1.6);
-//		Vec v2 = Physics.intersect2(p1, p3, p4, pos, size, size/1.6);
-//		double d1 = size, d2;
-//		if (v != null) {
-//			d2 = v.distanceTo(pos);
-//			System.out.println("Dist1:" + d1);
-//			if (d1 > d2) {
-//				d1 = d2;
-//			}
-//		}
-//		if (v2 != null) {
-//			d2 = v2.distanceTo(pos);
-//			System.out.println("Dist2:" + d1);
-//			if (d1 > d2) {
-//				d1 = d2;
-//			}
-//		}
-//		if (d1 < size) {
-//			System.out.println("Dist3:" + d1);
-//			return n.mul(-(size - d1));
-//		}
-//		System.out.println("None");
-		Vec v = Physics.intersectRect(p1, p2, p3, pos, size, size/1.6);
-		double tmp;
-		if (v!=null/* && (tmp=v.distanceTo(pos)) < size*/) {
-			return v.sub(pos).normalizeToLength(size).sub(v.sub(pos));
-			//return n.mul(-(size - tmp));
+		// Vec v = Physics.intersect2(p1, p2, p3, pos, size, size/1.6);
+		// Vec v2 = Physics.intersect2(p1, p3, p4, pos, size, size/1.6);
+		// double d1 = size, d2;
+		// if (v != null) {
+		// d2 = v.distanceTo(pos);
+		// System.out.println("Dist1:" + d1);
+		// if (d1 > d2) {
+		// d1 = d2;
+		// }
+		// }
+		// if (v2 != null) {
+		// d2 = v2.distanceTo(pos);
+		// System.out.println("Dist2:" + d1);
+		// if (d1 > d2) {
+		// d1 = d2;
+		// }
+		// }
+		// if (d1 < size) {
+		// System.out.println("Dist3:" + d1);
+		// return n.mul(-(size - d1));
+		// }
+		// System.out.println("None");
+		Vec v = Physics.intersectRect(p1, p2, p3, pos, size, 0/* size/1.6 */);
+		//double tmp;
+		if (v != null/* && (tmp=v.distanceTo(pos)) < size */) {
+			v = v.sub(pos);
+			return v.normalizeToLength(size).sub(v);
+			// return n.mul(-(size - tmp));
 		}
 		return null;
-		
+
 		// Vec v3 = v == null ? new Vec(3) :
 		// v.sub(pos).normalizeToLength(size).sub(v.sub(pos));
 		// if (v2 != null)
