@@ -158,6 +158,7 @@ public abstract class Entity {
 		if (pos.withinRectangle(Vec.fromList(ix - 0.5 + size, iy - 0.5 + size, iz - 0.5 + size), Vec.fromList(ix + 0.5 - size, iy + 0.5 - size, iz + 0.5 - size)) && !m.isWall(pos))
 			return;
 		Vec v = new Vec(3), tmp;
+		int num = 0;
 		for (int i = -1; i <= 1; i++) {
 			for (int j = -1; j <= 1; j++) {
 				// for (int k = -1; k <= 1; k++) {
@@ -172,18 +173,44 @@ public abstract class Entity {
 					Vec xnypzp = tmp.add(Vec.fromList(-0.5, 0.5, 0.5));
 					Vec xpypzp = tmp.add(Vec.fromList(0.5, 0.5, 0.5));
 					// System.out.println("Test at:" + tmp + "@" + pos);
-					v = v.add(shortestDistanceToRectangle(xnynzn, xnypzn, xpypzn, xpynzn));
-					v = v.add(shortestDistanceToRectangle(xnynzp, xpynzp, xpypzp, xnypzp));
-					v = v.add(shortestDistanceToRectangle(xnynzn, xnynzp, xnypzp, xnypzn));
-					v = v.add(shortestDistanceToRectangle(xpynzn, xpypzn, xpypzp, xpynzp));
-					v = v.add(shortestDistanceToRectangle(xnynzn, xpynzn, xpynzp, xnynzp));
-					v = v.add(shortestDistanceToRectangle(xnypzn, xnypzp, xpypzp, xpypzn));
+					tmp = shortestDistanceToRectangle(xnynzn, xnypzn, xpypzn, xpynzn);
+					if(tmp!=null){
+						v = v.add(tmp);
+						num++;
+					}
+					tmp = shortestDistanceToRectangle(xnynzp, xpynzp, xpypzp, xnypzp);
+					if(tmp!=null){
+						v = v.add(tmp);
+						num++;
+					}
+					tmp = shortestDistanceToRectangle(xnynzn, xnynzp, xnypzp, xnypzn);
+					if(tmp!=null){
+						v = v.add(tmp);
+						num++;
+					}
+					tmp = shortestDistanceToRectangle(xpynzn, xpypzn, xpypzp, xpynzp);
+					if(tmp!=null){
+						v = v.add(tmp);
+						num++;
+					}
+					tmp = shortestDistanceToRectangle(xnynzn, xpynzn, xpynzp, xnynzp);
+					if(tmp!=null){
+						v = v.add(tmp);
+						num++;
+					}
+					tmp = shortestDistanceToRectangle(xnypzn, xnypzp, xpypzp, xpypzn);
+					if(tmp!=null){
+						v = v.add(tmp);
+						num++;
+					}
 				}
 				// }
 			}
 		}
 		// System.out.println(v);
-		this.pos = pos.sub(v);
+		if(num>0){
+			this.pos = pos.sub(v.div(num));
+		}
 	}
 
 	private Vec shortestDistanceToRectangle(Vec p1, Vec p2, Vec p3, Vec p4) {
@@ -220,10 +247,11 @@ public abstract class Entity {
 //		System.out.println("None");
 		Vec v = Physics.intersectRect(p1, p2, p3, pos, size, size/1.6);
 		double tmp;
-		if (v!=null && (tmp=v.distanceTo(pos)) < size) {
-			return n.mul(-(size - tmp));
+		if (v!=null/* && (tmp=v.distanceTo(pos)) < size*/) {
+			return v.sub(pos).normalizeToLength(size).sub(v.sub(pos));
+			//return n.mul(-(size - tmp));
 		}
-		return new Vec(3);
+		return null;
 		
 		// Vec v3 = v == null ? new Vec(3) :
 		// v.sub(pos).normalizeToLength(size).sub(v.sub(pos));

@@ -138,9 +138,15 @@ public class Physics {
 		double pT = t.dot(p);
 		if (Math.abs(d) >= dist)
 			return null;
-		double borderS = border / s.pNorm(2), borderT = border / t.pNorm(2);
+		// double borderS = border / s.pNorm(2), borderT = border / t.pNorm(2);
+		final double borderS = 0, borderT = 0;
 		if (pS > 0 - borderS && pT > 0 - borderT && pS < 1 + borderS && +pT < 1 + borderT)
 			return o.addWithMultiplier(s, pS).addWithMultiplier(t, pT);
+		pS = pS > 0 ? pS < 1 ? pS : 1 : 0;
+		pT = pT > 0 ? pT < 1 ? pT : 1 : 0;
+		Vec bp = o.add(s.mul(pS)).add(t.mul(pT));
+		if(bp.distanceToSmaller(point, dist))
+			return bp;
 		return null;
 	}
 
