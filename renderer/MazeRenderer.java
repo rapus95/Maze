@@ -41,12 +41,12 @@ public class MazeRenderer {
 		Vec pos = m.currentPlayer().getPos();
 		final int renderDistance = 15;
 		double posX = pos.getComponent(0), posY = pos.getComponent(1), posZ = pos.getComponent(2);
-		int leftXClip = Math.max(0, (int) (posX - renderDistance + 0.5));
-		int rightXClip = Math.min((int) (dimensions.getComponent(0) + 0.5), (int) (posX + renderDistance + 0.5));
-		int leftYClip = Math.max(0, (int) (posY - renderDistance + 0.5));
-		int rightYClip = Math.min((int) (dimensions.getComponent(1) + 0.5), (int) (posY + renderDistance + 0.5));
-		int leftZClip = Math.max(0, (int) (posZ - renderDistance + 0.5));
-		int rightZClip = Math.min((int) (dimensions.getComponent(2) + 0.5), (int) (posZ + renderDistance + 0.5));
+		int leftXClip = Math.max(-1, (int) (posX - renderDistance + 0.5));
+		int rightXClip = Math.min(1+(int) (dimensions.getComponent(0) + 0.5), (int) (posX + renderDistance + 0.5));
+		int leftYClip = Math.max(-1, (int) (posY - renderDistance + 0.5));
+		int rightYClip = Math.min(1+(int) (dimensions.getComponent(1) + 0.5), (int) (posY + renderDistance + 0.5));
+		int leftZClip = Math.max(-1, (int) (posZ - renderDistance + 0.5));
+		int rightZClip = Math.min(1+(int) (dimensions.getComponent(2) + 0.5), (int) (posZ + renderDistance + 0.5));
 		Vec leftEnd = new Vec(leftXClip - 0.5, leftYClip - 0.5, leftZClip - 0.5), rightEnd = new Vec(rightXClip + 0.5, rightYClip + 0.5, rightZClip + 0.5);
 		// Blocks
 		Vec currPos;

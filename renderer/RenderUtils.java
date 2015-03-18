@@ -1,6 +1,5 @@
 package renderer;
 
-import math.matrix.Mat;
 import math.matrix.Vec;
 
 import org.lwjgl.opengl.GL11;

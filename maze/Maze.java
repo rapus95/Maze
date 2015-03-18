@@ -12,7 +12,6 @@ import java.util.UUID;
 import math.matrix.Vec;
 import maze.blocks.Air;
 import maze.blocks.Wall;
-import maze.entities.Bomb;
 import maze.entities.Player;
 
 public class Maze {
@@ -25,9 +24,11 @@ public class Maze {
 
 	public Maze() {
 		// entities[1] = new Player(this, tmp);
-		Maze.fillMaze(walls, Air.INSTANCE);
-		walls[5][5][0] = new BlockData(Wall.INSTANCE, Vec.fromList(5, 5, 0));
-//		Maze.genMaze(walls);
+		Maze.fillMaze(walls, Wall.INSTANCE);
+//		walls[5][5][0] = new BlockData(Wall.INSTANCE, Vec.fromList(5, 5, 0));
+		long seed = -1310318952414076928L;//=(long)((-Math.random()+0.5)*2*Long.MAX_VALUE)
+		Maze.genMaze(walls, seed);
+		System.out.println(seed);
 		Vec tmp = getNonWall((int) (Math.random() * 100));
 //		System.out.println("here");
 		spawnEntity(currentPlayer = new Player(this, tmp));
@@ -130,8 +131,8 @@ public class Maze {
 		}
 	}
 
-	private static void genMaze(BlockData[][][] maze) {
-		Random rand = new Random();
+	private static void genMaze(BlockData[][][] maze, long seed) {
+		Random rand = new Random(seed);
 		int x = rand.nextInt(maze.length);
 		int y = rand.nextInt(maze[x].length);
 		int z = rand.nextInt(maze[x][y].length);
