@@ -57,108 +57,24 @@ public abstract class Entity {
 		pos = pos.addWithMultiplier(rot.mul(viewDirection), speedForward * timeDelta / 1000_000_000d).addWithMultiplier(viewDirection, speedSideward * timeDelta / 1000_000_000d);
 	}
 
-	// public void moveOutOfWall() {
-	// if (!canCollideWithWall())
-	// return;
-	//
-	// double size = getSize();
-	// double x = pos.getComponent(0);
-	// double y = pos.getComponent(1);
-	// double z = pos.getComponent(2);
-	// int ix = (int) Math.floor(x + 0.5);
-	// int iy = (int) Math.floor(y + 0.5);
-	// int iz = (int) Math.floor(z + 0.5);
-	// double px = ix - x;
-	// double py = iy - y;
-	// double pz = iz - z;
-	// if (pos.withinRectangle(Vec.fromList(ix - 0.5 + size, iy - 0.5 + size, iz
-	// - 0.5 + size), Vec.fromList(ix + 0.5 - size, iy + 0.5 - size, iz + 0.5 -
-	// size)) && !m.isWall(pos))
-	// return;
-	// // System.out.println("px:" + px + ", py:" + py + ", x:" + x + ", y:" +
-	// // y + ", ix:" + ix + ", iy:" + iy);
-	// if (m.isWall(Vec.fromList(ix, iy, iz))) {
-	// if (Math.abs(px) < Math.abs(py) && Math.abs(pz) < Math.abs(py)) {
-	// if (py > 0) {
-	// y = iy - 0.5 - size;
-	// } else {
-	// y = iy + 0.5 + size;
-	// }
-	// pos.setComponent(1, y);
-	// } else if (Math.abs(pz) < Math.abs(px)) {
-	// if (px > 0) {
-	// x = ix - 0.5 - size;
-	// } else {
-	// x = ix + 0.5 + size;
-	// }
-	// pos.setComponent(0, x);
-	// } else {
-	// if (pz > 0) {
-	// z = iz - 0.5 - size;
-	// } else {
-	// z = iz + 0.5 + size;
-	// }
-	// pos.setComponent(2, z);
-	// }
-	// } else {
-	// double l;
-	// if (px < -0.5 + size && m.isWall(Vec.fromList(ix + 1, iy, iz))) {
-	// pos.setComponent(0, ix + 0.5 - size);
-	// if (py < -0.5 + size && m.isWall(Vec.fromList(ix, iy + 1, iz))) {
-	// pos.setComponent(1, iy + 0.5 - size);
-	// } else if (py > 0.5 - size && m.isWall(Vec.fromList(ix, iy - 1, iz))) {
-	// pos.setComponent(1, iy - 0.5 + size);
-	// }
-	// } else if (px > 0.5 - size && m.isWall(Vec.fromList(ix - 1, iy, iz))) {
-	// pos.setComponent(0, ix - 0.5 + size);
-	// if (py < -0.5 + size && m.isWall(Vec.fromList(ix, iy + 1, iz))) {
-	// pos.setComponent(1, iy + 0.5 - size);
-	// } else if (py > 0.5 - size && m.isWall(Vec.fromList(ix, iy - 1, iz))) {
-	// pos.setComponent(1, iy - 0.5 + size);
-	// }
-	// } else if (py < -0.5 + size && m.isWall(Vec.fromList(ix, iy + 1, iz))) {
-	// pos.setComponent(1, iy + 0.5 - size);
-	// } else if (py > 0.5 - size && m.isWall(Vec.fromList(ix, iy - 1, iz))) {
-	// pos.setComponent(1, iy - 0.5 + size);
-	// } else if ((l = l(px, py, -0.5, -0.5)) < size && m.isWall(Vec.fromList(ix
-	// + 1, iy + 1, iz))) {
-	// pos.setComponent(0, ix + 0.5 - (px + 0.5) / l * size);
-	// pos.setComponent(1, iy + 0.5 - (py + 0.5) / l * size);
-	// } else if ((l = l(px, py, 0.5, -0.5)) < size && m.isWall(Vec.fromList(ix
-	// - 1, iy + 1, iz))) {
-	// pos.setComponent(0, ix - 0.5 - (px - 0.5) / l * size);
-	// pos.setComponent(1, iy + 0.5 - (py + 0.5) / l * size);
-	// } else if ((l = l(px, py, 0.5, 0.5)) < size && m.isWall(Vec.fromList(ix -
-	// 1, iy - 1, iz))) {
-	// pos.setComponent(0, ix - 0.5 - (px - 0.5) / l * size);
-	// pos.setComponent(1, iy - 0.5 - (py - 0.5) / l * size);
-	// } else if ((l = l(px, py, -0.5, 0.5)) < size && m.isWall(Vec.fromList(ix
-	// + 1, iy - 1, iz))) {
-	// pos.setComponent(0, ix + 0.5 - (px + 0.5) / l * size);
-	// pos.setComponent(1, iy - 0.5 - (py - 0.5) / l * size);
-	// }
-	// }
-	// }
-
 	public void moveOutOfWall() {
 		if (!canCollideWithWall())
 			return;
 
 		double size = getSize();
-		double x = pos.getComponent(0);
-		double y = pos.getComponent(1);
-		double z = pos.getComponent(2);
+		double x = pos.get(0);
+		double y = pos.get(1);
+		double z = pos.get(2);
 		int ix = (int) Math.floor(x + 0.5);
 		int iy = (int) Math.floor(y + 0.5);
 		int iz = (int) Math.floor(z + 0.5);
 		if (pos.withinRectangle(Vec.fromList(ix - 0.5 + size, iy - 0.5 + size, iz - 0.5 + size), Vec.fromList(ix + 0.5 - size, iy + 0.5 - size, iz + 0.5 - size)) && !m.isWall(pos))
 			return;
 		Vec rOuter[] = new Vec[27], tmp;
-		int num = 0;
 		for (int i = -1; i <= 1; i++) {
 			for (int j = -1; j <= 1; j++) {
 				for (int k = -1; k <= 1; k++) {
-					if (m.isWall(tmp = pos.add(Vec.fromList(i, j, 0)))) {
+					if (m.isWall(tmp = pos.add(Vec.fromList(i, j, k)))) {
 						tmp = tmp.round();
 						Vec xnynzn = tmp.add(Vec.fromList(-0.5, -0.5, -0.5));
 						Vec xpynzn = tmp.add(Vec.fromList(0.5, -0.5, -0.5));
@@ -182,7 +98,6 @@ public abstract class Entity {
 				}
 			}
 		}
-		// System.out.println(v);
 		this.pos = pos.sub(Vec.mixFromHighestComponents(3, rOuter));
 	}
 	private Vec shortestDistanceToRectangle(Vec p1, Vec p2, Vec p3, Vec p4) {
@@ -192,7 +107,6 @@ public abstract class Entity {
 		if (v != null/* && (tmp=v.distanceTo(pos)) < size */) {
 			v = v.sub(pos);
 			return v.normalizeToLength(size).sub(v);
-			// return n.mul(-(size - tmp));
 		}
 		return null;
 	}
@@ -257,6 +171,10 @@ public abstract class Entity {
 
 	}
 
+	public Gravity gravityType() {
+		return Gravity.STATIC;
+	}
+
 	public void readSync(DataInputStream dataInputStream) throws IOException {
 		Utils.readVec(dataInputStream, this.pos);
 		Utils.readVec(dataInputStream, this.viewDirection);
@@ -265,12 +183,32 @@ public abstract class Entity {
 		this.speedSideward = dataInputStream.readFloat();
 	}
 
-	// private static final Mat DOWN = new Mat(3, 3);
-	// static{
-	// DOWN.setIdentity(-1);
-	// }
-	public void fall() {
-		// pos = pos.add(up.normalizeToLength(0.002));
+	private static final Mat UP_DOWN = new Mat(3, 3);
+	static {
+		UP_DOWN.setIdentity(1);
+		UP_DOWN.setValue(2, 2, -1);
+	}
+
+	private static final Vec GLOBAL_DOWN = Vec.fromList(0, 0, -1);
+	public void fall(long dTime) {
+		up = up.normalize();
+		switch (gravityType()) {
+			case NONE :
+				return;
+			case DYNAMIC : {
+				Vec vec = viewMat.mul(Vec.fromList(0, 1, 0));
+				double c1 = vec.get(1);
+				vec.set(1, vec.get(2));
+				vec.set(2, c1);
+				pos = pos.addWithMultiplier(vec, -0.981 * dTime / 1000_000_000d);
+			}
+				return;
+			case STATIC :
+				pos = pos.addWithMultiplier(GLOBAL_DOWN, 0.981 * dTime / 1000_000_000d);
+				return;
+			default :
+				break;
+		}
 	}
 
 }

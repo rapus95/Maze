@@ -2,6 +2,7 @@ package maze.entities;
 
 import math.matrix.Vec;
 import maze.Entity;
+import maze.Gravity;
 import maze.Maze;
 import maze.effects.Explosion;
 
@@ -88,6 +89,11 @@ public class Player extends Entity {
 
 	public long getDieAni() {
 		return dieAni/2;
+	}
+	
+	@Override
+	public Gravity gravityType() {
+		return Gravity.STATIC;
 	}
 
 }

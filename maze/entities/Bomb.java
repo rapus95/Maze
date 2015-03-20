@@ -47,7 +47,7 @@ public class Bomb extends Entity {
 		for (int i = 0; i < pos.getDimensionCount(); i++) {
 			double remaining = p;
 			Vec off = new Vec(pos.getDimensionCount());
-			off.setComponent(i, 1);
+			off.set(i, 1);
 			Vec pos = this.pos;
 			while(remaining-->0){
 				pos = pos.add(off);
@@ -57,7 +57,7 @@ public class Bomb extends Entity {
 				m.spawnEntity(new Explosion(m, pos));
 			}
 			remaining = p;
-			off.setComponent(i, -1);
+			off.set(i, -1);
 			pos = this.pos;
 			while(remaining-->0){
 				pos = pos.add(off);
@@ -88,6 +88,8 @@ public class Bomb extends Entity {
 	@Override
 	public boolean isStatic(Entity other) {
 		if(other instanceof Player){
+			if (other.getPos().distanceToSmaller(this.getPos(), (other.getSize() + this.getSize()) * 0.90))
+				return true;
 			return !((Player)other).canKickBomb();
 		}
 		return super.isStatic(other);
@@ -95,6 +97,6 @@ public class Bomb extends Entity {
 
 	@Override
 	public double getSize() {
-		return 0.2;
+		return 0.15;
 	}
 }

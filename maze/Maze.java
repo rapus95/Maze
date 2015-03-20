@@ -15,38 +15,44 @@ import maze.blocks.Wall;
 import maze.entities.Player;
 
 public class Maze {
-	private BlockData walls[][][] = new BlockData[50][50][1];
+	private final BlockData walls[][][] = new BlockData[50][50][10];
 	private Map<UUID, Entity> entities = new HashMap<>();
 	private final List<Entity> entityList = new ArrayList<>();
 	public Player currentPlayer;
 	private double nextRandomBomb = 5;
-	private boolean fixedGravity = true;
 
 	public Maze() {
 		// entities[1] = new Player(this, tmp);
 		Maze.fillMaze(walls, Wall.INSTANCE);
-//		walls[5][5][0] = new BlockData(Wall.INSTANCE, Vec.fromList(5, 5, 0));
-		long seed = -1310318952414076928L;//=(long)((-Math.random()+0.5)*2*Long.MAX_VALUE)
+		// walls[5][5][0] = new BlockData(Wall.INSTANCE, Vec.fromList(5, 5, 0));
+		long seed = (long) ((-Math.random() + 0.5) * 2 * Long.MAX_VALUE);// =
+																			// -1310318952414076928L;//
 		Maze.genMaze(walls, seed);
 		System.out.println(seed);
-		Vec tmp = getNonWall((int) (Math.random() * 100));
-//		System.out.println("here");
+		Vec tmp = getNonWall((int) (Math.random() * walls.length * walls[0].length * walls[0][0].length));
+		// System.out.println("here");
 		spawnEntity(currentPlayer = new Player(this, tmp));
-//		spawnEntity(new Player(this, tmp));
-//		System.out.println("here");
+		// spawnEntity(new Player(this, tmp));
+		// System.out.println("here");
 	}
 
 	private Vec getNonWall(int start) {
 		Vec tmp;
-		start %= walls.length * walls[0].length * walls[0][0].length;
-		for (int i = start / walls.length; i < walls.length; i++) {
-			for (int j = start / walls.length / walls[0].length; j < i && j < walls[i].length; j++) {
-				for (int k = start % walls[0][0].length; k < i && k < walls[i].length && k < j && k < walls[i][j].length; k++) {
-					if (!isWall(tmp = Vec.fromList(i, j, k)))
-						return tmp;
-				}
-			}
-		}
+		int xm = walls.length;
+		int ym = xm  * walls[0].length;
+		int zm = ym  * walls[0][0].length;
+		start %= zm;
+		int c = start;
+		do {
+			int x,y,z;
+			z = c/ym;
+			y = (c-z*ym)/xm;
+			x = c-z*ym-y*xm;
+			if (!isWall(tmp = Vec.fromList(x, y, z)))
+				return tmp;
+			c++;
+			c %= zm;
+		} while (c != start);
 		return new Vec(3);
 	}
 	public boolean isWall(Vec pos) {
@@ -54,7 +60,7 @@ public class Maze {
 	}
 
 	public BlockData get(Vec pos) {
-		int x = (int) Math.floor(pos.getComponent(0) + 0.5), y = (int) Math.floor(pos.getComponent(1) + 0.5), z = (int) Math.floor(pos.getComponent(2) + 0.5);
+		int x = (int) Math.floor(pos.get(0) + 0.5), y = (int) Math.floor(pos.get(1) + 0.5), z = (int) Math.floor(pos.get(2) + 0.5);
 		if (x < 0 || x >= walls.length)
 			return new BlockData(Wall.INSTANCE, Vec.fromList(x, y, z));
 		if (y < 0 || y >= walls[x].length)
@@ -84,7 +90,7 @@ public class Maze {
 	public void tick(long deltaTime) {
 		nextRandomBomb -= deltaTime / 1000_000_000d;
 		if (nextRandomBomb < 0) {
-//			System.out.println("bombPlaced");
+			// System.out.println("bombPlaced");
 			nextRandomBomb = 5;
 			//spawnEntity(new Bomb(this, getNonWall((int) (Math.random() * 100)), null, (int) (Math.random() * 10), (int) (Math.random() * 10) + 10));
 		}
@@ -95,7 +101,7 @@ public class Maze {
 		int size = entityList.size();
 		for (int i = 0; i < entityList.size(); i++) {
 			Entity e = entityList.get(i);
-			e.fall();
+			e.fall(deltaTime);
 		}
 		for (int i = 0; i < entityList.size(); i++) {
 			Entity e = entityList.get(i);
@@ -225,10 +231,6 @@ public class Maze {
 
 	public Entity getEntity(UUID uuid) {
 		return entities.get(uuid);
-	}
-	
-	public boolean isGravityFixed(){
-		return fixedGravity;
 	}
 
 }

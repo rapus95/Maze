@@ -40,13 +40,13 @@ public class MazeRenderer {
 		Vec dimensions = m.getDimensions();
 		Vec pos = m.currentPlayer().getPos();
 		final int renderDistance = 15;
-		double posX = pos.getComponent(0), posY = pos.getComponent(1), posZ = pos.getComponent(2);
+		double posX = pos.get(0), posY = pos.get(1), posZ = pos.get(2);
 		int leftXClip = Math.max(-1, (int) (posX - renderDistance + 0.5));
-		int rightXClip = Math.min(1+(int) (dimensions.getComponent(0) + 0.5), (int) (posX + renderDistance + 0.5));
+		int rightXClip = Math.min(1+(int) (dimensions.get(0) + 0.5), (int) (posX + renderDistance + 0.5));
 		int leftYClip = Math.max(-1, (int) (posY - renderDistance + 0.5));
-		int rightYClip = Math.min(1+(int) (dimensions.getComponent(1) + 0.5), (int) (posY + renderDistance + 0.5));
+		int rightYClip = Math.min(1+(int) (dimensions.get(1) + 0.5), (int) (posY + renderDistance + 0.5));
 		int leftZClip = Math.max(-1, (int) (posZ - renderDistance + 0.5));
-		int rightZClip = Math.min(1+(int) (dimensions.getComponent(2) + 0.5), (int) (posZ + renderDistance + 0.5));
+		int rightZClip = Math.min(1+(int) (dimensions.get(2) + 0.5), (int) (posZ + renderDistance + 0.5));
 		Vec leftEnd = new Vec(leftXClip - 0.5, leftYClip - 0.5, leftZClip - 0.5), rightEnd = new Vec(rightXClip + 0.5, rightYClip + 0.5, rightZClip + 0.5);
 		// Blocks
 		Vec currPos;
@@ -58,6 +58,7 @@ public class MazeRenderer {
 					currPos = Vec.fromList(x, y, z);
 					GL11.glPushMatrix();
 					GL11.glTranslated(x, z, y);
+					GL11.glScaled(0.5, 0.5, 0.5);
 					renderBlock(m.get(currPos));
 					if(!currPos.distanceToSmaller(m.get(currPos).vec, 1))
 						System.out.println("WARNING!!!" + currPos + ":" + m.get(currPos).vec);
@@ -66,11 +67,11 @@ public class MazeRenderer {
 			}
 		}
 		// Entities
-		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 		for (Entity e : m.getEntities()) {
 			if (e.getPos().withinRectangle(leftEnd, rightEnd)) {
 				GL11.glPushMatrix();
-				GL11.glTranslated(e.getPos().getComponent(0), e.getPos().getComponent(2), e.getPos().getComponent(1));
+				GL11.glTranslated(e.getPos().get(0), e.getPos().get(2), e.getPos().get(1));
+				GL11.glScaled(e.getSize(), e.getSize(), e.getSize());
 				renderEntity(e);
 				GL11.glPopMatrix();
 			}

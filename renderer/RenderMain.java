@@ -210,7 +210,7 @@ public class RenderMain {
 			
 			
 			Vec pos = m.currentPlayer().getPos();
-			double posX = pos.getComponent(0), posY = pos.getComponent(1), posZ = pos.getComponent(2);
+			double posX = pos.get(0), posY = pos.get(1), posZ = pos.get(2);
 			GL11.glPushMatrix();
 			GL11.glTranslated(-posX, -posZ, -posY);
 			m.tick(-(lastNanoTime - (lastNanoTime = System.nanoTime())));

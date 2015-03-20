@@ -3,6 +3,7 @@ package maze.effects;
 import math.matrix.Vec;
 import maze.Effect;
 import maze.Entity;
+import maze.Gravity;
 import maze.Maze;
 
 public class Explosion extends Effect {
@@ -40,7 +41,12 @@ public class Explosion extends Effect {
 
 	@Override
 	public double getSize() {
-		return Math.sqrt(0.5*0.5);
+		return Math.sqrt(2);
+	}
+	
+	@Override
+	public Gravity gravityType() {
+		return Gravity.NONE;
 	}
 	
 }

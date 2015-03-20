@@ -20,12 +20,12 @@ public class Utils {
 
 	public static void writeVec(DataOutputStream out, IVec vec) throws IOException {
 		for (int i = 0; i < vec.getDimensionCount(); i++)
-			out.writeDouble(vec.getComponent(i));
+			out.writeDouble(vec.get(i));
 	}
 
 	public static <T extends IVec> T readVec(DataInputStream dataInputStream, T vec) throws IOException {
 		for (int i = 0; i < vec.getDimensionCount(); i++)
-			vec.setComponent(i, dataInputStream.readDouble());
+			vec.set(i, dataInputStream.readDouble());
 		return vec;
 	}
 
