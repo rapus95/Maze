@@ -110,7 +110,7 @@ public class Physics {
 		return null;
 	}
 
-	public static Vec intersectRect(Vec p1, Vec p2, Vec p3, Vec point, double dist, double border) {
+	public static Vec intersectRect(Vec p1, Vec p2, Vec p3, Vec point, double dist) {
 
 		Vec o = p1;
 		Vec s = p2.sub(o);
@@ -138,17 +138,11 @@ public class Physics {
 		double pT = t.dot(p);
 		if (Math.abs(d) >= dist)
 			return null;
-		double borderS = border / s.pNorm(2), borderT = border / t.pNorm(2);
-		// final double borderS = 0, borderT = 0;
-		// if (pS > 0 - borderS && pT > 0 - borderT && pS < 1 + borderS && +pT <
-		// 1 + borderT)
-		// return o.addWithMultiplier(s, pS).addWithMultiplier(t, pT);
-		pS = pS > -borderS ? pS < 1 + borderS ? pS : 1 + borderS : -borderS;
-		pT = pT > -borderT ? pT < 1 + borderT ? pT : 1 + borderT : -borderT;
+		pS=Math.max(0, Math.min(1, pS));
+		pT=Math.max(0, Math.min(1, pT));
 		Vec bp = o.addWithMultiplier(s, pS).addWithMultiplier(t, pT);
 		if (bp.distanceToSmaller(point, dist))
 			return bp;
 		return null;
 	}
-
 }

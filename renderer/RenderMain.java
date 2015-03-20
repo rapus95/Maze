@@ -295,8 +295,4 @@ public class RenderMain {
 		return GLFW.glfwGetKey(window, key) == GLFW.GLFW_PRESS;
 	}
 
-	public static void main(String[] args) {
-		new RenderMain().run();
-	}
-
 }
