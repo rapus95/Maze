@@ -1,6 +1,6 @@
 package maze.effects;
 
-import math.matrix.Vec;
+import math.vecmat.Vec3;
 import maze.Effect;
 import maze.Entity;
 import maze.Gravity;
@@ -10,7 +10,7 @@ public class Explosion extends Effect {
 
 	private double toLive;
 
-	public Explosion(Maze m, Vec pos) {
+	public Explosion(Maze m, Vec3 pos) {
 		super(m, pos.round());
 		toLive = 2;
 	}
@@ -41,7 +41,7 @@ public class Explosion extends Effect {
 
 	@Override
 	public double getSize() {
-		return Math.sqrt(2);
+		return Math.sqrt(0.5);
 	}
 	
 	@Override

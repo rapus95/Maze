@@ -1,58 +1,60 @@
 package renderer;
 
-import math.matrix.Vec;
+import math.vecmat.Vec3;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.Sphere;
+
+import static math.vecmat.Vec.*;
 
 public class RenderUtils {
 
 	
 	public static void renderCube(boolean colored) {
-		Vec u2 = Vec.fromList(-1, 1, 1), u1 = Vec.fromList(-1, -1, 1), u4 = Vec.fromList(1, -1, 1), u3 = Vec.fromList(1, 1, 1),
-				d2 = Vec.fromList(-1, 1, -1), d1 = Vec.fromList(-1, -1, -1), d4 = Vec.fromList(1, -1, -1), d3 = Vec.fromList(1, 1, -1);
+		Vec3 u2 = Vec3(-1, 1, 1), d2 = Vec3(-1, -1, 1), d3 = Vec3(1, -1, 1), u3 = Vec3(1, 1, 1),
+				u1 = Vec3(-1, 1, -1), d1 = Vec3(-1, -1, -1), d4 = Vec3(1, -1, -1), u4 = Vec3(1, 1, -1);
 			//UP
 			if(colored) GL11.glColor3f(0.0f, 1.0f, 0.0f);
-			renderFace(d3, d2, u2, u3);
+			renderFace(u4, u1, u2, u3);
 			
 			//DOWN
 			if(colored) GL11.glColor3f(1.0f, 0.5f, 0.0f);
-			renderFace(u4, u1, d1, d4);
+			renderFace(d3, d2, d1, d4);
 			
 			//FRONT
 			if(colored) GL11.glColor3f(1.0f, 0.0f, 0.0f);
-			renderFace(u3, u2, u1, u4);
+			renderFace(u3, u2, d2, d3);
 			
 			//BACK
 			if(colored) GL11.glColor3f(1.0f, 1.0f, 0.0f);
-			renderFace(d4, d1, d2, d3);
+			renderFace(d4, d1, u1, u4);
 			
 			//LEFT
 			if(colored) GL11.glColor3f(0.0f, 0.0f, 1.0f);
-			renderFace(u2, d2, d1, u1);
+			renderFace(u2, u1, d1, d2);
 			
 			//RIGHT
 			if(colored) GL11.glColor3f(1.0f, 0.0f, 1.0f);
-			renderFace(d3, u3, u4, d4);
+			renderFace(u4, u3, d3, d4);
 	}
 	
-	private static void renderFace(Vec v1, Vec v2, Vec v3, Vec v4){
+	private static void renderFace(Vec3 v1, Vec3 v2, Vec3 v3, Vec3 v4){
 		GL11.glBegin(GL11.GL_QUADS);
-		GL11.glVertex3(v1.asTmpDoubleBuffer(true));
-		GL11.glVertex3(v2.asTmpDoubleBuffer(true));
-		GL11.glVertex3(v3.asTmpDoubleBuffer(true));
-		GL11.glVertex3(v4.asTmpDoubleBuffer(true));
+		GL11.glVertex3(asTmpBuffer(v1));
+		GL11.glVertex3(asTmpBuffer(v2));
+		GL11.glVertex3(asTmpBuffer(v3));
+		GL11.glVertex3(asTmpBuffer(v4));
 		GL11.glEnd();
 //		renderNormal(v1, v2, v3);
 	}
 	
-	public static void renderNormal(Vec v1, Vec v2, Vec v3){
-		Vec n = v2.sub(v1).cross(v3.sub(v1)).normalize();
-		Vec center = v1.add(v2).add(v3).div(3);
+	public static void renderNormal(Vec3 v1, Vec3 v2, Vec3 v3){
+		Vec3 n = v2.sub(v1).cross(v3.sub(v1)).normalize();
+		Vec3 center = v1.add(v2).add(v3).div(3);
 		GL11.glColor3d(0, 0, 0);
 		GL11.glBegin(GL11.GL_LINES);
-		GL11.glVertex3(center.asTmpDoubleBuffer(true));
-		GL11.glVertex3(center.add(n).asTmpDoubleBuffer(true));
+		GL11.glVertex3(asTmpBuffer(center));
+		GL11.glVertex3(asTmpBuffer(center.add(n)));
 		GL11.glEnd();
 	}
 	

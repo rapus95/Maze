@@ -31,8 +31,8 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
-import math.matrix.PolarVec;
-import math.matrix.Vec;
+import math.vecmat.PolarVec;
+import math.vecmat.Vec3;
 import maze.Maze;
 import maze.entities.Player;
 
@@ -159,8 +159,8 @@ public class RenderMain {
 				double xd = xpos - 400;
 				double yd = ypos - 300;
 				PolarVec t = p.getViewDirection();
-				t.setComponent(1, t.getComponent(1) + xd * 0.002);
-				t.setComponent(2, Math.max(-Math.PI / 2, Math.min(Math.PI / 2, t.getComponent(2) + yd * 0.002)));
+				t.set(1, t.get(1) + xd * 0.002);
+				t.set(2, Math.max(-Math.PI / 2, Math.min(Math.PI / 2, t.get(2) + yd * 0.002)));
 				GLFW.glfwSetCursorPos(window, 800 / 2, 600 / 2);
 			}
 		}.setMaze(m);
@@ -198,21 +198,20 @@ public class RenderMain {
 		GLFW.glfwSetCursorPos(window, 800 / 2, 600 / 2);
 		while (!shallClose) {
 
-
 			glfwMakeContextCurrent(window);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the
 																// framebuffer
 			glLoadIdentity();
 			PolarVec viewTarget = m.currentPlayer().getViewDirection();
-			GL11.glRotated(Math.toDegrees(viewTarget.getComponent(2)), 1, 0, 0);
-			GL11.glRotated(Math.toDegrees(viewTarget.getComponent(1)), 0, 1, 0);
+			// GL11.glRotated(Math.toDegrees(viewTarget.get(1)), 1, 0, 0);
+			GL11.glRotated(Math.toDegrees(viewTarget.get(2)), 1, 0, 0);
+			GL11.glRotated(Math.toDegrees(viewTarget.get(1)), 0, 1, 0);
 			m.currentPlayer = (Player) m.getEntities().get(0);
-			
-			
-			Vec pos = m.currentPlayer().getPos();
-			double posX = pos.get(0), posY = pos.get(1), posZ = pos.get(2);
+
+			Vec3 pos = m.currentPlayer().getPos();
+			double posX = pos.x(), posY = pos.y(), posZ = pos.z();
 			GL11.glPushMatrix();
-			GL11.glTranslated(-posX, -posZ, -posY);
+			GL11.glTranslated(-posX, -posY, -posZ);
 			m.tick(-(lastNanoTime - (lastNanoTime = System.nanoTime())));
 			GL11.glPopMatrix();
 			mr.render(m);
@@ -226,8 +225,8 @@ public class RenderMain {
 				m.currentPlayer = (Player) m.getEntities().get(1);
 				glLoadIdentity();
 				viewTarget = m.currentPlayer().getViewDirection();
-				GL11.glRotated(Math.toDegrees(viewTarget.getComponent(2)), 1, 0, 0);
-				GL11.glRotated(Math.toDegrees(viewTarget.getComponent(1)), 0, 1, 0);
+				GL11.glRotated(Math.toDegrees(viewTarget.get(2)), 1, 0, 0);
+				GL11.glRotated(Math.toDegrees(viewTarget.get(1)), 0, 1, 0);
 				mr.render(m);
 				glfwSwapBuffers(window2); // swap the color buffers
 
@@ -247,8 +246,9 @@ public class RenderMain {
 	public void handleJoystick(Player p) {
 		FloatBuffer b = GLFW.glfwGetJoystickAxes(GLFW.GLFW_JOYSTICK_1);
 		PolarVec t = p.getViewDirection();
-		t.setComponent(1, t.getComponent(1) + b.get(4) * 0.1);
-		//t.setComponent(2, Math.max(-Math.PI / 2, Math.min(Math.PI / 2, t.getComponent(2) + b.get(0) * 0.1)));
+		t.set(1, t.get(1) + b.get(4) * 0.1);
+		// t.setComponent(2, Math.max(-Math.PI / 2, Math.min(Math.PI / 2,
+		// t.getComponent(2) + b.get(0) * 0.1)));
 		ByteBuffer bb = GLFW.glfwGetJoystickButtons(GLFW.GLFW_JOYSTICK_1);
 		p.setForwardSpeed((bb.get(5) == 1 ? 2 : 1) * (-b.get(3)));
 		p.setSidewardSpeed((bb.get(5) == 1 ? 2 : 1) * b.get(0));

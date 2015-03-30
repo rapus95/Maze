@@ -5,7 +5,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.UUID;
 
-import math.matrix.IVec;
+import math.vecmat.PolarVec;
+import math.vecmat.Vec;
 
 public class Utils {
 
@@ -18,13 +19,24 @@ public class Utils {
 		return new UUID(in.readLong(), in.readLong());
 	}
 
-	public static void writeVec(DataOutputStream out, IVec vec) throws IOException {
-		for (int i = 0; i < vec.getDimensionCount(); i++)
+	public static void writeVec(DataOutputStream out, Vec<?> vec) throws IOException {
+		for (int i = 0; i < vec.dim(); i++)
 			out.writeDouble(vec.get(i));
 	}
 
-	public static <T extends IVec> T readVec(DataInputStream dataInputStream, T vec) throws IOException {
-		for (int i = 0; i < vec.getDimensionCount(); i++)
+	public static <T extends Vec<T>> T readVec(DataInputStream dataInputStream, T vec) throws IOException {
+		for (int i = 0; i < vec.dim(); i++)
+			vec.set(i, dataInputStream.readDouble());
+		return vec;
+	}
+	
+	public static void writeVec(DataOutputStream out, PolarVec vec) throws IOException {
+		for (int i = 0; i < vec.dim(); i++)
+			out.writeDouble(vec.get(i));
+	}
+
+	public static PolarVec readVec(DataInputStream dataInputStream, PolarVec vec) throws IOException {
+		for (int i = 0; i < vec.dim(); i++)
 			vec.set(i, dataInputStream.readDouble());
 		return vec;
 	}

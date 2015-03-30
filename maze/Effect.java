@@ -1,10 +1,10 @@
 package maze;
 
-import math.matrix.Vec;
+import math.vecmat.Vec3;
 
 public abstract class Effect extends Entity {
 
-	public Effect(Maze m, Vec pos) {
+	public Effect(Maze m, Vec3 pos) {
 		super(m, pos);
 	}
 

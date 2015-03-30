@@ -1,6 +1,6 @@
 package maze.entities;
 
-import math.matrix.Vec;
+import math.vecmat.Vec3;
 import maze.Entity;
 import maze.Gravity;
 import maze.Maze;
@@ -18,11 +18,11 @@ public class Player extends Entity {
 
 	private int bombPower = 1;
 
-	private Vec startPos;
+	private Vec3 startPos;
 
 	private long dieAni = -1;
 
-	public Player(Maze m, Vec pos) {
+	public Player(Maze m, Vec3 pos) {
 		super(m, pos);
 		this.startPos = pos;
 	}
@@ -64,7 +64,7 @@ public class Player extends Entity {
 	@Override
 	public boolean isStatic(Entity other) {
 		if (other instanceof Bomb) {
-			if (other.getPos().distanceToSmaller(this.getPos(), (other.getSize() + this.getSize()) * 0.90))
+			if (other.getPos().distanceSmaller(this.getPos(), (other.getSize() + this.getSize()) * 0.90))
 				return true;
 			return false;
 		}

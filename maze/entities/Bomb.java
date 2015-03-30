@@ -1,6 +1,7 @@
 package maze.entities;
 
-import math.matrix.Vec;
+import math.vecmat.Vec;
+import math.vecmat.Vec3;
 import maze.Entity;
 import maze.Maze;
 import maze.effects.Explosion;
@@ -15,7 +16,7 @@ public class Bomb extends Entity {
 
 	private boolean exploded;
 
-	public Bomb(Maze m, Vec pos, Player player, double power, double time) {
+	public Bomb(Maze m, Vec3 pos, Player player, double power, double time) {
 		super(m, pos);
 		this.player = player;
 		this.power = power;
@@ -44,11 +45,11 @@ public class Bomb extends Entity {
 			return;
 		}
 		m.spawnEntity(new Explosion(m, this.pos));
-		for (int i = 0; i < pos.getDimensionCount(); i++) {
+		for (int i = 0; i < pos.dim(); i++) {
 			double remaining = p;
-			Vec off = new Vec(pos.getDimensionCount());
+			Vec3 off = Vec.Vec3();
 			off.set(i, 1);
-			Vec pos = this.pos;
+			Vec3 pos = this.pos;
 			while(remaining-->0){
 				pos = pos.add(off);
 				if((remaining = m.get(pos).onExplode(this, pos, remaining))<=0){
@@ -88,7 +89,7 @@ public class Bomb extends Entity {
 	@Override
 	public boolean isStatic(Entity other) {
 		if(other instanceof Player){
-			if (other.getPos().distanceToSmaller(this.getPos(), (other.getSize() + this.getSize()) * 0.90))
+			if (other.getPos().distanceSmaller(this.getPos(), (other.getSize() + this.getSize()) * 0.90))
 				return true;
 			return !((Player)other).canKickBomb();
 		}

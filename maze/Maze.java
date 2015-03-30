@@ -9,10 +9,12 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
-import math.matrix.Vec;
+import math.vecmat.Vec3;
 import maze.blocks.Air;
 import maze.blocks.Wall;
 import maze.entities.Player;
+
+import static math.vecmat.Vec.*;
 
 public class Maze {
 	private final BlockData walls[][][] = new BlockData[50][50][10];
@@ -24,20 +26,20 @@ public class Maze {
 	public Maze() {
 		// entities[1] = new Player(this, tmp);
 		Maze.fillMaze(walls, Wall.INSTANCE);
-		// walls[5][5][0] = new BlockData(Wall.INSTANCE, Vec.fromList(5, 5, 0));
+		// walls[5][5][0] = new BlockData(Wall.INSTANCE, Vec3(5, 5, 0));
 		long seed = (long) ((-Math.random() + 0.5) * 2 * Long.MAX_VALUE);// =
 																			// -1310318952414076928L;//
 		Maze.genMaze(walls, seed);
 		System.out.println(seed);
-		Vec tmp = getNonWall((int) (Math.random() * walls.length * walls[0].length * walls[0][0].length));
+		Vec3 tmp = getNonWall((int) (Math.random() * walls.length * walls[0].length * walls[0][0].length));
 		// System.out.println("here");
 		spawnEntity(currentPlayer = new Player(this, tmp));
 		// spawnEntity(new Player(this, tmp));
 		// System.out.println("here");
 	}
 
-	private Vec getNonWall(int start) {
-		Vec tmp;
+	private Vec3 getNonWall(int start) {
+		Vec3 tmp;
 		int xm = walls.length;
 		int ym = xm  * walls[0].length;
 		int zm = ym  * walls[0][0].length;
@@ -48,29 +50,29 @@ public class Maze {
 			z = c/ym;
 			y = (c-z*ym)/xm;
 			x = c-z*ym-y*xm;
-			if (!isWall(tmp = Vec.fromList(x, y, z)))
+			if (!isWall(tmp = Vec3(x, y, z)))
 				return tmp;
 			c++;
 			c %= zm;
 		} while (c != start);
-		return new Vec(3);
+		return Vec3();
 	}
-	public boolean isWall(Vec pos) {
+	public boolean isWall(Vec3 pos) {
 		return get(pos).block == Wall.INSTANCE;
 	}
 
-	public BlockData get(Vec pos) {
-		int x = (int) Math.floor(pos.get(0) + 0.5), y = (int) Math.floor(pos.get(1) + 0.5), z = (int) Math.floor(pos.get(2) + 0.5);
+	public BlockData get(Vec3 pos) {
+		int x = (int) Math.floor(pos.x() + 0.5), y = (int) Math.floor(pos.y() + 0.5), z = (int) Math.floor(pos.z() + 0.5);
 		if (x < 0 || x >= walls.length)
-			return new BlockData(Wall.INSTANCE, Vec.fromList(x, y, z));
+			return new BlockData(Wall.INSTANCE, Vec3(x, y, z));
 		if (y < 0 || y >= walls[x].length)
-			return new BlockData(Wall.INSTANCE, Vec.fromList(x, y, z));
+			return new BlockData(Wall.INSTANCE, Vec3(x, y, z));
 		if (z < 0 || z >= walls[x][y].length)
-			return new BlockData(Wall.INSTANCE, Vec.fromList(x, y, z));
+			return new BlockData(Wall.INSTANCE, Vec3(x, y, z));
 		return walls[x][y][z];
 	}
-	public Vec getDimensions() {
-		return Vec.fromList(walls.length, walls[0].length, walls[0][0].length);
+	public Vec3 getDimensions() {
+		return Vec3(walls.length, walls[0].length, walls[0][0].length);
 	}
 
 	public void spawnEntity(Entity entity) {
@@ -107,7 +109,7 @@ public class Maze {
 			Entity e = entityList.get(i);
 			for (int j = i + 1; j < size; j++) {
 				Entity e2 = entityList.get(j);
-				if (e.getPos().distanceToSmaller(e2.getPos(), e.getSize() + e2.getSize())) {
+				if (e.getPos().distanceSmaller(e2.getPos(), e.getSize() + e2.getSize())) {
 					e.onEntityCollideWith(e2);
 				}
 			}
@@ -131,7 +133,7 @@ public class Maze {
 		for (int i = 0; i < maze.length; i++) {
 			for (int j = 0; j < maze[i].length; j++) {
 				for (int k = 0; k < maze[i][j].length; k++) {
-					maze[i][j][k] = new BlockData(type, Vec.fromList(i, j, k));
+					maze[i][j][k] = new BlockData(type, Vec3(i, j, k));
 				}
 			}
 		}
@@ -151,27 +153,27 @@ public class Maze {
 					for (int k = 0; k < maze[i][j].length; k++) {
 						if (isBlocked(i, j, k, maze)) {
 							if (!isFilled(i - 2, j, k, maze) && isFilled(i - 1, j + 1, k, maze) && isFilled(i - 1, j - 1, k, maze) && isFilled(i - 1, j, k + 1, maze) && isFilled(i - 1, j, k - 1, maze)) {
-								maze[i - 1][j][k] = new BlockData(Air.INSTANCE, Vec.fromList(i - 1, j, k));
+								maze[i - 1][j][k] = new BlockData(Air.INSTANCE, Vec3(i - 1, j, k));
 								randomWay(i, j, k, maze);
 								again = true;
 							} else if (!isFilled(i + 2, j, k, maze) && isFilled(i + 1, j + 1, k, maze) && isFilled(i + 1, j - 1, k, maze) && isFilled(i + 1, j, k + 1, maze) && isFilled(i + 1, j, k - 1, maze)) {
-								maze[i + 1][j][k] = new BlockData(Air.INSTANCE, Vec.fromList(i + 1, j, k));
+								maze[i + 1][j][k] = new BlockData(Air.INSTANCE, Vec3(i + 1, j, k));
 								randomWay(i, j, k, maze);
 								again = true;
 							} else if (!isFilled(i, j - 2, k, maze) && isFilled(i + 1, j - 1, k, maze) && isFilled(i - 1, j - 1, k, maze) && isFilled(i, j - 1, k + 1, maze) && isFilled(i, j - 1, k - 1, maze)) {
-								maze[i][j - 1][k] = new BlockData(Air.INSTANCE, Vec.fromList(i, j - 1, k));
+								maze[i][j - 1][k] = new BlockData(Air.INSTANCE, Vec3(i, j - 1, k));
 								randomWay(i, j, k, maze);
 								again = true;
 							} else if (!isFilled(i, j + 2, k, maze) && isFilled(i + 1, j + 1, k, maze) && isFilled(i - 1, j + 1, k, maze) && isFilled(i, j + 1, k + 1, maze) && isFilled(i, j + 1, k - 1, maze)) {
-								maze[i][j + 1][k] = new BlockData(Air.INSTANCE, Vec.fromList(i, j + 1, k));
+								maze[i][j + 1][k] = new BlockData(Air.INSTANCE, Vec3(i, j + 1, k));
 								randomWay(i, j, k, maze);
 								again = true;
 							} else if (!isFilled(i, j, k - 2, maze) && isFilled(i + 1, j, k - 1, maze) && isFilled(i - 1, j, k - 1, maze) && isFilled(i, j + 1, k - 1, maze) && isFilled(i, j - 1, k - 1, maze)) {
-								maze[i][j][k - 1] = new BlockData(Air.INSTANCE, Vec.fromList(i, j, k - 1));
+								maze[i][j][k - 1] = new BlockData(Air.INSTANCE, Vec3(i, j, k - 1));
 								randomWay(i, j, k, maze);
 								again = true;
 							} else if (!isFilled(i, j, k + 2, maze) && isFilled(i + 1, j, k + 1, maze) && isFilled(i - 1, j, k + 1, maze) && isFilled(i, j + 1, k + 1, maze) && isFilled(i, j - 1, k + 1, maze)) {
-								maze[i][j][k + 1] = new BlockData(Air.INSTANCE, Vec.fromList(i, j, k + 1));
+								maze[i][j][k + 1] = new BlockData(Air.INSTANCE, Vec3(i, j, k + 1));
 								randomWay(i, j, k, maze);
 								again = true;
 							}
@@ -184,7 +186,7 @@ public class Maze {
 
 	private static void randomWay(int x, int y, int z, BlockData[][][] maze) {
 		Random rand = new Random();
-		maze[x][y][z] = new BlockData(Air.INSTANCE, Vec.fromList(x, y, z));
+		maze[x][y][z] = new BlockData(Air.INSTANCE, Vec3(x, y, z));
 		int steps = rand.nextInt(10);
 		while (steps-- > 0) {
 			int nx = x;
@@ -216,7 +218,7 @@ public class Maze {
 				x = nx;
 				y = ny;
 				z = nz;
-				maze[x][y][z] = new BlockData(Air.INSTANCE, Vec.fromList(x, y, z));
+				maze[x][y][z] = new BlockData(Air.INSTANCE, Vec3(x, y, z));
 			}
 		}
 	}
