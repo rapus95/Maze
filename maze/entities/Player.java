@@ -93,7 +93,7 @@ public class Player extends Entity {
 	
 	@Override
 	public Gravity gravityType() {
-		return Gravity.STATIC;
+		return Gravity.DYNAMIC;
 	}
 
 }

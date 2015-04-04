@@ -17,7 +17,7 @@ public abstract class Entity {
 
 	protected Maze m;
 
-	protected Vec3 pos, up = Vec3(0,1,0);
+	protected Vec3 pos, down = Vec3(0,-1,0);
 	protected PolarVec viewDirection = PolarVec.fromList(1, Math.PI / 2, 0);
 	protected float speedForward = 0, speedSideward = 0;
 
@@ -55,10 +55,11 @@ public abstract class Entity {
 		// System.out.println(this.viewDirection.toVec());
 		// System.out.println(dimChanger.mul(this.viewDirection.toVec()));
 		Vec3 viewDirection = this.viewDirection.<Vec3>toVec();
-		System.out.println(viewDirection);
+		//System.out.println(viewDirection);
 //		viewDirection.set(2, 0);
+		double tmp = viewDirection.z();
 		viewDirection.z(viewDirection.y());
-		viewDirection.set(1, 0);
+		viewDirection.y(tmp);
 		// System.out.println(viewDirection);
 		pos = pos.addScaled(rot.<Vec3>mul(viewDirection), speedForward * timeDelta / 1000_000_000d).addScaled(viewDirection, speedSideward * timeDelta / 1000_000_000d);
 	}
@@ -104,7 +105,10 @@ public abstract class Entity {
 				}
 			}
 		}
-		this.pos = pos.sub(mixFromHighestComponents(3, rOuter));
+		Vec3 out = mixFromHighestComponents(3, rOuter);
+		if(gravityType()==Gravity.DYNAMIC && !out.equals(Vec3(0, 0, 0)))
+			this.down = out.normalize();
+		this.pos = pos.sub(out);
 	}
 	private Vec3 shortestDistanceToRectangle(Vec3 p1, Vec3 p2, Vec3 p3, Vec3 p4) {
 		double size = getSize();
@@ -171,7 +175,7 @@ public abstract class Entity {
 	public void writeSync(DataOutputStream dataOutputStream) throws IOException {
 		Utils.writeVec(dataOutputStream, this.pos);
 		Utils.writeVec(dataOutputStream, this.viewDirection);
-		Utils.writeVec(dataOutputStream, this.up);
+		Utils.writeVec(dataOutputStream, this.down);
 		dataOutputStream.writeFloat(this.speedForward);
 		dataOutputStream.writeFloat(this.speedSideward);
 
@@ -184,23 +188,27 @@ public abstract class Entity {
 	public void readSync(DataInputStream dataInputStream) throws IOException {
 		Utils.readVec(dataInputStream, this.pos);
 		Utils.readVec(dataInputStream, this.viewDirection);
-		Utils.readVec(dataInputStream, this.up);
+		Utils.readVec(dataInputStream, this.down);
 		this.speedForward = dataInputStream.readFloat();
 		this.speedSideward = dataInputStream.readFloat();
 	}
 
-	private static final Vec3 GLOBAL_DOWN = Vec3(0, -1, 0);
+	//private static final Vec3 GLOBAL_DOWN = Vec3(0, -1, 0);
 	public void fall(long dTime) {
-		up = up.normalize();
+		//down = down.normalize();
 		switch (gravityType()) {
-			case DYNAMIC :
+			//case DYNAMIC :
+			//	System.out.println(down);
+			//	pos = pos.addScaled(down, 0.981 * dTime / 1000_000_000d);
+			//	return;
 			case NONE :
 				return;
 			case STATIC :
-				pos = pos.addScaled(GLOBAL_DOWN, 0.981 * dTime / 1000_000_000d);
+				default:
+				pos = pos.addScaled(down, 0.981 * dTime / 1000_000_000d);
 				return;
-			default :
-				break;
+			//default :
+			//	break;
 		}
 	}
 
