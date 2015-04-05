@@ -158,13 +158,14 @@ public class RenderMain {
 			public void invoke(long window, double xpos, double ypos) {
 				double xd = xpos - 400;
 				double yd = ypos - 300;
-				//Vec3 t = p.getViewDirection();
+				// Vec3 t = p.getViewDirection();
 				Vec3 down = p.getUp();
 				p.rotate(xd * 0.1);
 				p.uplook(yd * 0.1);
-				//t.set(1, t.get(1) + xd * 0.002);
-				//t.set(2, Math.max(-Math.PI / 2, Math.min(Math.PI / 2, t.get(2) + yd * 0.002)));
-				//t.set(t.normalize());
+				// t.set(1, t.get(1) + xd * 0.002);
+				// t.set(2, Math.max(-Math.PI / 2, Math.min(Math.PI / 2,
+				// t.get(2) + yd * 0.002)));
+				// t.set(t.normalize());
 				GLFW.glfwSetCursorPos(window, 800 / 2, 600 / 2);
 			}
 		}.setMaze(m);
@@ -180,7 +181,7 @@ public class RenderMain {
 		glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
 		glMatrixMode(GL11.GL_PROJECTION);
 		glLoadIdentity();
-		//GLU.gluPerspective(60, 800.0f / 600, 0.1f, 100);
+		// GLU.gluPerspective(60, 800.0f / 600, 0.1f, 100);
 		GL11.glMultMatrix(Mat.asTmpBufferGL(Mat.createPerspectiveMarix(60, 800.0 / 600, 0.1, 100)));
 		glMatrixMode(GL11.GL_MODELVIEW);
 		glLoadIdentity();
@@ -192,7 +193,7 @@ public class RenderMain {
 			glMatrixMode(GL11.GL_PROJECTION);
 			glLoadIdentity();
 			GL11.glMultMatrix(Mat.asTmpBufferGL(Mat.createPerspectiveMarix(60, 800.0 / 600, 0.1, 100)));
-			//GLU.gluPerspective(60, 800.0f / 600, 0.1f, 100);
+			// GLU.gluPerspective(60, 800.0f / 600, 0.1f, 100);
 			glMatrixMode(GL11.GL_MODELVIEW);
 			glLoadIdentity();
 			GL11.glEnable(GL11.GL_DEPTH_TEST);
@@ -212,21 +213,24 @@ public class RenderMain {
 			Vec3 viewTarget = m.currentPlayer().getViewDirection();
 			Vec3 up = m.currentPlayer().getUp();
 			Vec3 pos = m.currentPlayer().getPos();
-			
+
 			Mat4 rot = Mat.createRotationMarix(m.currentPlayer().uplook(), 1, 0, 0);
 			GL11.glMultMatrix(Mat.asTmpBufferGL(rot));
-			Mat4 lookAt = Mat.createLookAtMatrix(pos.x(), pos.y(), pos.z(), pos.x()+viewTarget.x(), pos.y()+viewTarget.y(), pos.z()+viewTarget.z(), up.x(), up.y(), up.z());
+			Mat4 lookAt = Mat.createLookAtMatrix(pos.x(), pos.y(), pos.z(), pos.x() + viewTarget.x(), pos.y() + viewTarget.y(), pos.z() + viewTarget.z(), up.x(), up.y(), up.z());
 			GL11.glMultMatrix(Mat.asTmpBufferGL(lookAt));
-			//GLU.gluLookAt((float)pos.x(), (float)pos.y(), (float)pos.z(), (float)(pos.x()+viewTarget.x()), (float)(pos.y()+viewTarget.y()), (float)(pos.z()+viewTarget.z()), (float)up.x(), (float)up.y(), (float)up.z());
-			
-			// GL11.glRotated(Math.toDegrees(viewTarget.get(1)), 1, 0, 0);
-			//GL11.glRotated(Math.toDegrees(viewTarget.get(2)), 1, 0, 0);
-			//GL11.glRotated(Math.toDegrees(viewTarget.get(1)), 0, 1, 0);
+			// GLU.gluLookAt((float)pos.x(), (float)pos.y(), (float)pos.z(),
+			// (float)(pos.x()+viewTarget.x()), (float)(pos.y()+viewTarget.y()),
+			// (float)(pos.z()+viewTarget.z()), (float)up.x(), (float)up.y(),
+			// (float)up.z());
 
-			//Vec3 pos = m.currentPlayer().getPos();
-			//double posX = pos.x(), posY = pos.y(), posZ = pos.z();
+			// GL11.glRotated(Math.toDegrees(viewTarget.get(1)), 1, 0, 0);
+			// GL11.glRotated(Math.toDegrees(viewTarget.get(2)), 1, 0, 0);
+			// GL11.glRotated(Math.toDegrees(viewTarget.get(1)), 0, 1, 0);
+
+			// Vec3 pos = m.currentPlayer().getPos();
+			// double posX = pos.x(), posY = pos.y(), posZ = pos.z();
 			GL11.glPushMatrix();
-			//GL11.glTranslated(-posX, -posY, -posZ);
+			// GL11.glTranslated(-posX, -posY, -posZ);
 			m.tick(-(lastNanoTime - (lastNanoTime = System.nanoTime())));
 			GL11.glPopMatrix();
 			mr.render(m);
@@ -260,8 +264,8 @@ public class RenderMain {
 
 	public void handleJoystick(Player p) {
 		FloatBuffer b = GLFW.glfwGetJoystickAxes(GLFW.GLFW_JOYSTICK_1);
-		//PolarVec t = p.getViewDirection();
-		//t.set(1, t.get(1) + b.get(4) * 0.1);
+		// PolarVec t = p.getViewDirection();
+		// t.set(1, t.get(1) + b.get(4) * 0.1);
 		// t.setComponent(2, Math.max(-Math.PI / 2, Math.min(Math.PI / 2,
 		// t.getComponent(2) + b.get(0) * 0.1)));
 		ByteBuffer bb = GLFW.glfwGetJoystickButtons(GLFW.GLFW_JOYSTICK_1);
@@ -278,7 +282,7 @@ public class RenderMain {
 		}
 	}
 
-	private boolean space;
+	private boolean space, lCtrl;
 
 	public void handleKeyboard(Player p) {
 		boolean shift = isPressed(window, GLFW.GLFW_KEY_LEFT_SHIFT) || isPressed(window, GLFW.GLFW_KEY_RIGHT_SHIFT);
@@ -292,6 +296,15 @@ public class RenderMain {
 		speed += isPressed(window, GLFW.GLFW_KEY_A) ? -1 : 0;
 		speed *= shift ? 2 : 1;
 		p.setSidewardSpeed(speed);
+
+		if (isPressed(window, GLFW.GLFW_KEY_LEFT_CONTROL)) {
+			if (!lCtrl) {
+				p.toggleGravityMode();
+				lCtrl = true;
+			}
+		} else {
+			lCtrl = false;
+		}
 
 		if (isPressed(window, GLFW.GLFW_KEY_ESCAPE))
 			shallClose = true;

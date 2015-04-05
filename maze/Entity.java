@@ -3,6 +3,7 @@ package maze;
 import static math.vecmat.Mat.Mat3;
 import static math.vecmat.Vec.Vec3;
 import static math.vecmat.Vec.mixFromHighestComponents;
+import static math.vecmat.Vec.sumUp;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -216,7 +217,7 @@ public abstract class Entity {
 				return;
 			case STATIC :
 				default:
-				pos = pos.addScaled(rotation.<Vec3>mul(UP), -0.981 * dTime / 1000_000_000d);
+				pos = pos.addScaled(getUp(), -0.981 * dTime / 1000_000_000d);
 				return;
 			//default :
 			//	break;

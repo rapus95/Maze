@@ -1,7 +1,5 @@
 package maze.entities;
 
-import org.lwjgl.system.MathUtil;
-
 import math.utils.MathUtils;
 import math.vecmat.Vec3;
 import maze.Entity;
@@ -26,6 +24,8 @@ public class Player extends Entity {
 	private long dieAni = -1;
 
 	private double upLook;
+	
+	private Gravity currentGravityMode = Gravity.STATIC;
 
 	public Player(Maze m, Vec3 pos) {
 		super(m, pos);
@@ -98,7 +98,11 @@ public class Player extends Entity {
 
 	@Override
 	public Gravity gravityType() {
-		return Gravity.DYNAMIC;
+		return this.currentGravityMode;
+	}
+	
+	public void toggleGravityMode(){
+		this.currentGravityMode = this.currentGravityMode.toggle();
 	}
 
 	public void uplook(double d) {
