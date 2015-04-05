@@ -16,19 +16,18 @@ import math.vecmat.Vec3;
 import net.Utils;
 
 public abstract class Entity {
-	
+
+	private static final double MAX_DYNAMIC_CHANGE = 70;
+
 	private static final Vec3 FORWARD = Vec3(1, 0, 0);
 	private static final Vec3 UP = Vec3(0, 1, 0);
 	private static final Vec3 DOWN = Vec3(0, -1, 0);
-	
+
 	protected Maze m;
 
 	protected Vec3 pos;
 	protected Mat3 rotation = Mat3();
-	//protected PolarVec viewDirection = PolarVec.fromList(1, Math.PI / 2, 0);
 	protected Vec3 speed = Vec3(0, 0, 0);
-
-	//private static final Mat3 rot = Mat.createRotationMarix3(-90, 0, 1, 0);
 
 	public UUID id;
 
@@ -53,23 +52,20 @@ public abstract class Entity {
 		return rotation.mul(FORWARD);
 	}
 
-	public void setViewDirection(Vec3 v) {
-		//this.forward = v.clone();
+	public void setViewDirection(Vec3 forward) {
+		forward = forward.normalize();
+		Vec3 axis = getUp();
+		Vec3 oldForward = rotation.mul(FORWARD);
+		Vec3 newForawrd = axis.cross(forward).cross(axis);
+		axis = newForawrd.cross(oldForward);
+		double rot = Math.toDegrees(Math.acos(newForawrd.dot(oldForward)));
+		if (rot != 0 && !Double.isNaN(rot)) {
+			rotation = rotation.mul(Mat.createRotationMarix3(rot, axis.x(), axis.y(), axis.z()));
+		}
 	}
 
 	public void tick(long timeDelta) {
-		// System.out.println(this.viewDirection);
-		// System.out.println(this.viewDirection.toVec());
-		// System.out.println(dimChanger.mul(this.viewDirection.toVec()));
-		//Vec3 viewDirection = this.viewDirection.<Vec3>toVec();
-		//System.out.println(viewDirection);
-//		viewDirection.set(2, 0);
-		//double tmp = viewDirection.z();
-		//viewDirection.z(viewDirection.y());
-		//viewDirection.y(tmp);
-		// System.out.println(viewDirection);
-		//pos = pos.addScaled(rot.<Vec3>mul(viewDirection), speedForward * timeDelta / 1000_000_000d).addScaled(viewDirection, speedSideward * timeDelta / 1000_000_000d);
-		pos = pos.addScaled(rotation.<Vec3>mul(speed), timeDelta / 1000_000_000d);
+		pos = pos.addScaled(rotation.<Vec3> mul(speed), timeDelta / 1000_000_000d);
 	}
 
 	public void moveOutOfWall() {
@@ -83,7 +79,8 @@ public abstract class Entity {
 		int ix = (int) Math.floor(x + 0.5);
 		int iy = (int) Math.floor(y + 0.5);
 		int iz = (int) Math.floor(z + 0.5);
-		if (pos.withinRectangle(Vec3(ix - 0.5 + size, iy - 0.5 + size, iz - 0.5 + size), Vec3(ix + 0.5 - size, iy + 0.5 - size, iz + 0.5 - size)) && !m.isWall(pos))
+		if (pos.withinRectangle(Vec3(ix - 0.5 + size, iy - 0.5 + size, iz - 0.5 + size), Vec3(ix + 0.5 - size, iy + 0.5 - size, iz + 0.5 - size))
+				&& !m.isWall(pos))
 			return;
 		Vec3 rOuter[] = new Vec3[27], tmp;
 		for (int i = -1; i <= 1; i++) {
@@ -100,31 +97,29 @@ public abstract class Entity {
 						Vec3 xnypzp = tmp.add(Vec3(-0.5, 0.5, 0.5));
 						Vec3 xpypzp = tmp.add(Vec3(0.5, 0.5, 0.5));
 						// System.out.println("Test at:" + tmp + "@" + pos);
-						Vec3 rInner[] = {
-								shortestDistanceToRectangle(xnynzn, xnypzn, xpypzn, xpynzn),
-								shortestDistanceToRectangle(xnynzp, xpynzp, xpypzp, xnypzp),
-								shortestDistanceToRectangle(xnynzn, xnynzp, xnypzp, xnypzn),
-								shortestDistanceToRectangle(xpynzn, xpypzn, xpypzp, xpynzp),
-								shortestDistanceToRectangle(xnynzn, xpynzn, xpynzp, xnynzp),
-								shortestDistanceToRectangle(xnypzn, xnypzp, xpypzp, xpypzn)};
-						rOuter[3*(3*(i+1)+(j+1))+(k+1)] = mixFromHighestComponents(3, rInner);
+						Vec3 rInner[] = { shortestDistanceToRectangle(xnynzn, xnypzn, xpypzn, xpynzn),
+								shortestDistanceToRectangle(xnynzp, xpynzp, xpypzp, xnypzp), shortestDistanceToRectangle(xnynzn, xnynzp, xnypzp, xnypzn),
+								shortestDistanceToRectangle(xpynzn, xpypzn, xpypzp, xpynzp), shortestDistanceToRectangle(xnynzn, xpynzn, xpynzp, xnynzp),
+								shortestDistanceToRectangle(xnypzn, xnypzp, xpypzp, xpypzn) };
+						rOuter[3 * (3 * (i + 1) + (j + 1)) + (k + 1)] = mixFromHighestComponents(3, rInner);
 
 					}
 				}
 			}
 		}
 		Vec3 out = mixFromHighestComponents(3, rOuter);
-		if(gravityType()==Gravity.DYNAMIC && !out.equals(Vec3(0, 0, 0))){
+		if (gravityType() == Gravity.DYNAMIC && !out.equals(Vec3(0, 0, 0))) {
 			Vec3 newDown = out.normalize();
 			Vec3 down = rotation.mul(DOWN);
 			Vec3 axis = newDown.cross(down);
 			double rot = Math.toDegrees(Math.acos(newDown.dot(down)));
-			if(rot!=0 && !Double.isNaN(rot)){
+			if (rot != 0 && !Double.isNaN(rot) && Math.abs(rot) < MAX_DYNAMIC_CHANGE) {
 				rotation = rotation.mul(Mat.createRotationMarix3(rot, axis.x(), axis.y(), axis.z()));
 			}
 		}
 		this.pos = pos.sub(out);
 	}
+
 	private Vec3 shortestDistanceToRectangle(Vec3 p1, Vec3 p2, Vec3 p3, Vec3 p4) {
 		double size = getSize();
 		Vec3 pos = getPos();
@@ -136,11 +131,11 @@ public abstract class Entity {
 		return null;
 	}
 
-	public void setForwardSpeed(float speed) {
+	public void setForwardSpeed(double speed) {
 		this.speed.x(speed);
 	}
 
-	public void setSidewardSpeed(float speed) {
+	public void setSidewardSpeed(double speed) {
 		this.speed.z(speed);
 	}
 
@@ -190,7 +185,7 @@ public abstract class Entity {
 	public void writeSync(DataOutputStream dataOutputStream) throws IOException {
 		Utils.writeVec(dataOutputStream, this.pos);
 		Utils.writeVec(dataOutputStream, this.speed);
-		//Utils.writeVec(dataOutputStream, this.down);
+		// Utils.writeVec(dataOutputStream, this.down);
 
 	}
 
@@ -201,35 +196,21 @@ public abstract class Entity {
 	public void readSync(DataInputStream dataInputStream) throws IOException {
 		Utils.readVec(dataInputStream, this.pos);
 		Utils.readVec(dataInputStream, this.speed);
-		//Utils.readVec(dataInputStream, this.down);
+		// Utils.readVec(dataInputStream, this.down);
 	}
 
-	//private static final Vec3 GLOBAL_DOWN = Vec3(0, -1, 0);
 	public void fall(long dTime) {
-		//down = down.normalize();
-		switch (gravityType()) {
-			//case DYNAMIC :
-			//	System.out.println(down);
-			//	pos = pos.addScaled(down, 0.981 * dTime / 1000_000_000d);
-			//	return;
-			case NONE :
-				return;
-			case STATIC :
-				default:
-				pos = pos.addScaled(rotation.<Vec3>mul(UP), -0.981 * dTime / 1000_000_000d);
-				return;
-			//default :
-			//	break;
-		}
+		if (gravityType() != Gravity.NONE)
+			pos = pos.addScaled(rotation.<Vec3> mul(UP), -0.981 * dTime / 1000_000_000d);
 	}
-	
+
 	public Vec3 getUp() {
-		return rotation.<Vec3>mul(UP);
+		return rotation.<Vec3> mul(UP);
 	}
-	
+
 	public void rotate(double d) {
 		Vec3 up = rotation.mul(UP);
-		rotation = rotation.mul(Mat.createRotationMarix3(d, up.x(), up.y(), up.z()));
+		rotation = rotation.rotate(d, up);
 	}
 
 }

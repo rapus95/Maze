@@ -1,7 +1,5 @@
 package maze.entities;
 
-import org.lwjgl.system.MathUtil;
-
 import math.utils.MathUtils;
 import math.vecmat.Vec3;
 import maze.Entity;
@@ -37,7 +35,7 @@ public class Player extends Entity {
 			return;
 		if (currBombAmount >= bombAmount)
 			return;
-		m.spawnEntity(new Bomb(m, pos, this, bombPower, 4));
+		m.spawnEntity(new Bomb(m, pos, rotation, this, bombPower, 4));
 		currBombAmount++;
 	}
 
@@ -55,9 +53,9 @@ public class Player extends Entity {
 			return true;
 		if (other instanceof Explosion)
 			die();
-		if (other instanceof Bomb) {
-			// other.setViewDirection(this.forward);
-			// other.setForwardSpeed(Math.max(1, this.speedForward));
+		if (other instanceof Bomb && canKickBomb()) {
+			other.setViewDirection(getViewDirection());
+			other.setForwardSpeed(Math.max(1, this.speed.x()));
 		}
 		return super.onEntityCollide(other);
 	}

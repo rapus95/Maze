@@ -25,10 +25,10 @@ import renderer.entities.PlayerRenderer;
 
 public class MazeRenderer {
 
-	private Map<Class<? extends Block>, BlockRenderer> rendererMappingBlocks = new HashMap<>();
-	private Map<Class<? extends Entity>, EntityRenderer> rendererMappingEntities = new HashMap<>();
+	private static Map<Class<? extends Block>, BlockRenderer> rendererMappingBlocks = new HashMap<>();
+	private static Map<Class<? extends Entity>, EntityRenderer> rendererMappingEntities = new HashMap<>();
 
-	public MazeRenderer() {
+	static{
 		rendererMappingEntities.put(Player.class, new PlayerRenderer());
 		rendererMappingEntities.put(Bomb.class, new BombRenderer());
 		rendererMappingEntities.put(Explosion.class, new ExplosionRenderer());
@@ -36,10 +36,16 @@ public class MazeRenderer {
 		rendererMappingBlocks.put(Wall.class, new WallRenderer());
 		rendererMappingBlocks.put(Air.class, new AirRenderer());
 	}
+	
+	private final Maze maze;
+	
+	public MazeRenderer(Maze maze) {
+		this.maze = maze;
+	}
 
-	public void render(Maze m) {
-		Vec3 dimensions = m.getDimensions();
-		Vec3 pos = m.currentPlayer().getPos();
+	public void render() {
+		Vec3 dimensions = maze.getDimensions();
+		Vec3 pos = maze.currentPlayer().getPos();
 		final int renderDistance = 15;
 		double posX = pos.get(0), posY = pos.get(1), posZ = pos.get(2);
 		int leftXClip = Math.max(-1, (int) (posX - renderDistance + 0.5));
@@ -51,8 +57,6 @@ public class MazeRenderer {
 		Vec3 leftEnd = Vec.Vec3(leftXClip - 0.5, leftYClip - 0.5, leftZClip - 0.5), rightEnd = Vec.Vec3(rightXClip + 0.5, rightYClip + 0.5, rightZClip + 0.5);
 		// Blocks
 		Vec3 currPos;
-		GL11.glPushMatrix();
-		//GL11.glTranslated(-posX, -posY, -posZ);
 		for (int x = leftXClip; x < rightXClip; x++) {
 			for (int y = leftYClip; y < rightYClip; y++) {
 				for (int z = leftZClip; z < rightZClip; z++) {
@@ -60,15 +64,15 @@ public class MazeRenderer {
 					GL11.glPushMatrix();
 					GL11.glTranslated(x, y, z);
 					GL11.glScaled(0.5, 0.5, 0.5);
-					renderBlock(m.get(currPos));
-					if(!currPos.distanceSmaller(m.get(currPos).vec, 1))
-						System.out.println("WARNING!!!" + currPos + ":" + m.get(currPos).vec);
+					renderBlock(maze.get(currPos));
+					if(!currPos.distanceSmaller(maze.get(currPos).vec, 1))
+						System.out.println("WARNING!!!" + currPos + ":" + maze.get(currPos).vec);
 					GL11.glPopMatrix();
 				}
 			}
 		}
 		// Entities
-		for (Entity e : m.getEntities()) {
+		for (Entity e : maze.getEntities()) {
 			if (e.getPos().withinRectangle(leftEnd, rightEnd)) {
 				GL11.glPushMatrix();
 				GL11.glTranslated(e.getPos().x(), e.getPos().y(), e.getPos().z());
@@ -77,7 +81,6 @@ public class MazeRenderer {
 				GL11.glPopMatrix();
 			}
 		}
-		GL11.glPopMatrix();
 	}
 	public void renderEntity(Entity entity) {
 		if (entity == null)

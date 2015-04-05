@@ -23,7 +23,7 @@ public class Maze {
 	public Player currentPlayer;
 	private double nextRandomBomb = 5;
 
-	public Maze() {
+	public Maze(int players) {
 		// entities[1] = new Player(this, tmp);
 		Maze.fillMaze(walls, Wall.INSTANCE);
 		// walls[5][5][0] = new BlockData(Wall.INSTANCE, Vec3(5, 5, 0));
@@ -34,7 +34,8 @@ public class Maze {
 		Vec3 tmp = getNonWall((int) (Math.random() * walls.length * walls[0].length * walls[0][0].length));
 		// System.out.println("here");
 		spawnEntity(currentPlayer = new Player(this, tmp));
-		// spawnEntity(new Player(this, tmp));
+		for(int i=1; i<players; i++)
+			spawnEntity(new Player(this, tmp));
 		// System.out.println("here");
 	}
 

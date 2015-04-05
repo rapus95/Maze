@@ -60,5 +60,6 @@ public class RenderUtils {
 	//private static final Sphere s = new Sphere();
 	public static void renderSphere(){
 		//s.draw(1, 10, 10);
+		renderCube(false);//TODO not so low poly
 	}
 }

@@ -1,8 +1,10 @@
 package maze.entities;
 
+import math.vecmat.Mat3;
 import math.vecmat.Vec;
 import math.vecmat.Vec3;
 import maze.Entity;
+import maze.Gravity;
 import maze.Maze;
 import maze.effects.Explosion;
 
@@ -16,11 +18,12 @@ public class Bomb extends Entity {
 
 	private boolean exploded;
 
-	public Bomb(Maze m, Vec3 pos, Player player, double power, double time) {
+	public Bomb(Maze m, Vec3 pos, Mat3 rotation, Player player, double power, double time) {
 		super(m, pos);
 		this.player = player;
 		this.power = power;
 		this.time = time;
+		this.rotation = rotation;
 	}
 
 	@Override
@@ -40,7 +43,7 @@ public class Bomb extends Entity {
 		if (player != null)
 			player.onPlacedBombExploded(this);
 		double p = m.get(this.pos).onExplode(this, this.pos, power);
-		if(p<=0){
+		if (p <= 0) {
 			exploded = true;
 			return;
 		}
@@ -50,9 +53,9 @@ public class Bomb extends Entity {
 			Vec3 off = Vec.Vec3();
 			off.set(i, 1);
 			Vec3 pos = this.pos;
-			while(remaining-->0){
+			while (remaining-- > 0) {
 				pos = pos.add(off);
-				if((remaining = m.get(pos).onExplode(this, pos, remaining))<=0){
+				if ((remaining = m.get(pos).onExplode(this, pos, remaining)) <= 0) {
 					break;
 				}
 				m.spawnEntity(new Explosion(m, pos));
@@ -60,9 +63,9 @@ public class Bomb extends Entity {
 			remaining = p;
 			off.set(i, -1);
 			pos = this.pos;
-			while(remaining-->0){
+			while (remaining-- > 0) {
 				pos = pos.add(off);
-				if((remaining = m.get(pos).onExplode(this, pos, remaining))<=0){
+				if ((remaining = m.get(pos).onExplode(this, pos, remaining)) <= 0) {
 					break;
 				}
 				m.spawnEntity(new Explosion(m, pos));
@@ -70,7 +73,7 @@ public class Bomb extends Entity {
 		}
 		exploded = true;
 	}
-	
+
 	@Override
 	public boolean isDead() {
 		return exploded;
@@ -78,20 +81,20 @@ public class Bomb extends Entity {
 
 	@Override
 	public boolean onEntityCollide(Entity other) {
-		if(other instanceof Explosion){
+		if (other instanceof Explosion) {
 			explode();
 		}
-//		}else if(other instanceof Bomb)
-//			return true;
+		// }else if(other instanceof Bomb)
+		// return true;
 		return super.onEntityCollide(other);
 	}
 
 	@Override
 	public boolean isStatic(Entity other) {
-		if(other instanceof Player){
+		if (other instanceof Player) {
 			if (other.getPos().distanceSmaller(this.getPos(), (other.getSize() + this.getSize()) * 0.90))
 				return true;
-			return !((Player)other).canKickBomb();
+			return !((Player) other).canKickBomb();
 		}
 		return super.isStatic(other);
 	}
@@ -100,4 +103,11 @@ public class Bomb extends Entity {
 	public double getSize() {
 		return 0.15;
 	}
+
+	@Override
+	public Gravity gravityType() {
+		// TODO static or dynamic or how to choose?
+		return Gravity.STATIC;
+	}
+
 }

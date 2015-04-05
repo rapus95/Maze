@@ -1,35 +1,9 @@
 package renderer;
 
-import static org.lwjgl.glfw.Callbacks.errorCallbackPrint;
-import static org.lwjgl.glfw.GLFW.GLFW_RESIZABLE;
-import static org.lwjgl.glfw.GLFW.GLFW_VISIBLE;
-import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
-import static org.lwjgl.glfw.GLFW.glfwDefaultWindowHints;
-import static org.lwjgl.glfw.GLFW.glfwDestroyWindow;
-import static org.lwjgl.glfw.GLFW.glfwGetPrimaryMonitor;
-import static org.lwjgl.glfw.GLFW.glfwGetVideoMode;
-import static org.lwjgl.glfw.GLFW.glfwInit;
-import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
-import static org.lwjgl.glfw.GLFW.glfwPollEvents;
-import static org.lwjgl.glfw.GLFW.glfwSetErrorCallback;
-import static org.lwjgl.glfw.GLFW.glfwSetWindowPos;
-import static org.lwjgl.glfw.GLFW.glfwShowWindow;
-import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
-import static org.lwjgl.glfw.GLFW.glfwSwapInterval;
-import static org.lwjgl.glfw.GLFW.glfwTerminate;
-import static org.lwjgl.glfw.GLFW.glfwWindowHint;
-import static org.lwjgl.opengl.GL11.GL_COLOR_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_DEPTH_BUFFER_BIT;
-import static org.lwjgl.opengl.GL11.GL_FALSE;
-import static org.lwjgl.opengl.GL11.GL_TRUE;
-import static org.lwjgl.opengl.GL11.glClear;
-import static org.lwjgl.opengl.GL11.glClearColor;
-import static org.lwjgl.opengl.GL11.glLoadIdentity;
-import static org.lwjgl.opengl.GL11.glMatrixMode;
-import static org.lwjgl.system.MemoryUtil.NULL;
-
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 import math.vecmat.Mat;
 import math.vecmat.Mat4;
@@ -38,6 +12,7 @@ import maze.Maze;
 import maze.entities.Player;
 
 import org.lwjgl.Sys;
+import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -49,13 +24,11 @@ public class RenderMain {
 
 	private GLFWErrorCallback errorCallback;
 
-	private boolean multiplayer = false;
-
 	private boolean shallClose = false;
 
-	// The window handle
-	private long window;
-	private long window2;
+	private Window[] windows = new Window[1];
+
+	private PlayerData[] players = new PlayerData[1];
 
 	public void run() {
 		System.out.println("Hello LWJGL " + Sys.getVersion() + "!");
@@ -64,13 +37,13 @@ public class RenderMain {
 			init();
 			loop();
 
-			// Release window and window callbacks
-			glfwDestroyWindow(window);
-			if (multiplayer)
-				glfwDestroyWindow(window2);
+			for (Window window : windows) {
+				window.dispose();
+			}
+
 		} finally {
 			// Terminate GLFW and release the GLFWerrorfun
-			glfwTerminate();
+			GLFW.glfwTerminate();
 			errorCallback.release();
 		}
 	}
@@ -78,73 +51,52 @@ public class RenderMain {
 	private void init() {
 		// Setup an error callback. The default implementation
 		// will print the error message in System.err.
-		glfwSetErrorCallback(errorCallback = errorCallbackPrint(System.err));
+		GLFW.glfwSetErrorCallback(errorCallback = Callbacks.errorCallbackPrint(System.err));
 
 		// Initialize GLFW. Most GLFW functions will not work before doing this.
-		if (glfwInit() != GL11.GL_TRUE)
+		if (GLFW.glfwInit() != GL11.GL_TRUE)
 			throw new IllegalStateException("Unable to initialize GLFW");
-
-		// Configure our window
-		glfwDefaultWindowHints(); // optional, the current window hints are
-									// already the default
-		glfwWindowHint(GLFW_VISIBLE, GL_FALSE); // the window will stay hidden
-												// after creation
-		glfwWindowHint(GLFW_RESIZABLE, GL_TRUE); // the window will be resizable
 
 		int WIDTH = 800;
 		int HEIGHT = 600;
 
-		// Create the window
-		window = glfwCreateWindow(WIDTH, HEIGHT, "Player1", NULL, NULL);
-		if (multiplayer)
-			window2 = glfwCreateWindow(WIDTH, HEIGHT, "Player2", NULL, NULL);
-		if (window == NULL || (multiplayer && window2 == NULL))
-			throw new RuntimeException("Failed to create the GLFW window");
-
-		// Setup a key callback. It will be called every time a key is pressed,
-		// repeated or released.
+		for (int i = 0; i < windows.length; i++) {
+			windows[i] = new Window(WIDTH, HEIGHT, "Player1");
+		}
 
 		// Get the resolution of the primary monitor
-		ByteBuffer vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+		ByteBuffer vidmode = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor());
 		// Center our window
-		glfwSetWindowPos(window, (GLFWvidmode.width(vidmode) - WIDTH) / 2 - WIDTH / 2 - 50, (GLFWvidmode.height(vidmode) - HEIGHT) / 4);
+		GLFW.glfwSetWindowPos(windows[0].window, (GLFWvidmode.width(vidmode) - WIDTH) / 2 - WIDTH / 2 - 50, (GLFWvidmode.height(vidmode) - HEIGHT) / 4);
 
-		if (multiplayer)
-			glfwSetWindowPos(window2, (GLFWvidmode.width(vidmode) - WIDTH) / 2 + WIDTH / 2 + 50, (GLFWvidmode.height(vidmode) - HEIGHT) / 4);
+		if (windows.length > 1)
+			GLFW.glfwSetWindowPos(windows[1].window, (GLFWvidmode.width(vidmode) - WIDTH) / 2 + WIDTH / 2 + 50, (GLFWvidmode.height(vidmode) - HEIGHT) / 4);
 
-		// Make the OpenGL context current
-		glfwMakeContextCurrent(window);
+		players[0] = new PlayerData();
+		players[0].window = windows[0];
 
-		if (multiplayer)
-			glfwMakeContextCurrent(window2);
-		// Enable v-sync
-		glfwSwapInterval(1);
+		if (players.length == 2) {
+			players[1] = new PlayerData();
+			if (windows.length == 1) {
+				players[1].window = windows[0];
+				windows[0].gridWidth = 2;
+				players[1].x = 1;
+			} else {
+				players[1].window = windows[1];
+			}
+		}
 
-		// Make the window visible
-		glfwShowWindow(window);
-
-		if (multiplayer)
-			glfwShowWindow(window2);
 	}
 
 	private void loop() {
 
-		// This line is critical for LWJGL's interoperation with GLFW's
-		// OpenGL context, or any context that is managed externally.
-		// LWJGL detects the context that is current in the current thread,
-		// creates the ContextCapabilities instance and makes the OpenGL
-		// bindings available for use.
-		glfwMakeContextCurrent(window);
-		GLContext.createFromCurrent();
-
-		if (multiplayer) {
-			glfwMakeContextCurrent(window2);
-			GLContext.createFromCurrent();
+		Maze m = new Maze(players.length);
+		MazeRenderer mr = new MazeRenderer(m);
+		players[0].player = m.currentPlayer();
+		for(int i=1; i<players.length; i++){
+			players[i].player = (Player) m.getEntities().get(i);
 		}
-
-		MazeRenderer mr = new MazeRenderer();
-		Maze m = new Maze();
-
+		
 		GLFWCursorPosCallback mouseCallBack = new GLFWCursorPosCallback() {
 
 			Player p;
@@ -156,117 +108,98 @@ public class RenderMain {
 
 			@Override
 			public void invoke(long window, double xpos, double ypos) {
-				double xd = xpos - 400;
-				double yd = ypos - 300;
-				//Vec3 t = p.getViewDirection();
-				Vec3 down = p.getUp();
+				double xd = xpos;
+				double yd = ypos;
 				p.rotate(xd * 0.1);
 				p.uplook(yd * 0.1);
-				//t.set(1, t.get(1) + xd * 0.002);
-				//t.set(2, Math.max(-Math.PI / 2, Math.min(Math.PI / 2, t.get(2) + yd * 0.002)));
-				//t.set(t.normalize());
-				GLFW.glfwSetCursorPos(window, 800 / 2, 600 / 2);
+				GLFW.glfwSetCursorPos(window, 0, 0);
 			}
 		}.setMaze(m);
-		GLFW.glfwSetCursorPosCallback(window, mouseCallBack);
 
-		GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
+		GLFW.glfwSetCursorPosCallback(windows[0].window, mouseCallBack);
 
-		if (multiplayer)
-			GLFW.glfwSetInputMode(window2, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
-		// Set the clear color
-
-		glfwMakeContextCurrent(window);
-		glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-		glMatrixMode(GL11.GL_PROJECTION);
-		glLoadIdentity();
-		//GLU.gluPerspective(60, 800.0f / 600, 0.1f, 100);
-		GL11.glMultMatrix(Mat.asTmpBufferGL(Mat.createPerspectiveMarix(60, 800.0 / 600, 0.1, 100)));
-		glMatrixMode(GL11.GL_MODELVIEW);
-		glLoadIdentity();
-		GL11.glEnable(GL11.GL_DEPTH_TEST);
-
-		if (multiplayer) {
-			glfwMakeContextCurrent(window2);
-			glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-			glMatrixMode(GL11.GL_PROJECTION);
-			glLoadIdentity();
-			GL11.glMultMatrix(Mat.asTmpBufferGL(Mat.createPerspectiveMarix(60, 800.0 / 600, 0.1, 100)));
-			//GLU.gluPerspective(60, 800.0f / 600, 0.1f, 100);
-			glMatrixMode(GL11.GL_MODELVIEW);
-			glLoadIdentity();
-			GL11.glEnable(GL11.GL_DEPTH_TEST);
+		for (Window window : windows) {
+			setupWindow(window);
 		}
 
-		// Run the rendering loop until the user has attempted to close
-		// the window or has pressed the ESCAPE key.
 		long lastNanoTime = System.nanoTime();
-		GLFW.glfwSetCursorPos(window, 800 / 2, 600 / 2);
 		while (!shallClose) {
 
-			glfwMakeContextCurrent(window);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the
-																// framebuffer
-			m.currentPlayer = (Player) m.getEntities().get(0);
-			glLoadIdentity();
-			Vec3 viewTarget = m.currentPlayer().getViewDirection();
-			Vec3 up = m.currentPlayer().getUp();
-			Vec3 pos = m.currentPlayer().getPos();
-			
-			Mat4 rot = Mat.createRotationMarix(m.currentPlayer().uplook(), 1, 0, 0);
-			GL11.glMultMatrix(Mat.asTmpBufferGL(rot));
-			Mat4 lookAt = Mat.createLookAtMatrix(pos.x(), pos.y(), pos.z(), pos.x()+viewTarget.x(), pos.y()+viewTarget.y(), pos.z()+viewTarget.z(), up.x(), up.y(), up.z());
-			GL11.glMultMatrix(Mat.asTmpBufferGL(lookAt));
-			//GLU.gluLookAt((float)pos.x(), (float)pos.y(), (float)pos.z(), (float)(pos.x()+viewTarget.x()), (float)(pos.y()+viewTarget.y()), (float)(pos.z()+viewTarget.z()), (float)up.x(), (float)up.y(), (float)up.z());
-			
-			// GL11.glRotated(Math.toDegrees(viewTarget.get(1)), 1, 0, 0);
-			//GL11.glRotated(Math.toDegrees(viewTarget.get(2)), 1, 0, 0);
-			//GL11.glRotated(Math.toDegrees(viewTarget.get(1)), 0, 1, 0);
-
-			//Vec3 pos = m.currentPlayer().getPos();
-			//double posX = pos.x(), posY = pos.y(), posZ = pos.z();
-			GL11.glPushMatrix();
-			//GL11.glTranslated(-posX, -posY, -posZ);
 			m.tick(-(lastNanoTime - (lastNanoTime = System.nanoTime())));
-			GL11.glPopMatrix();
-			mr.render(m);
-			glfwSwapBuffers(window); // swap the color buffers
 
-			handleKeyboard(m.currentPlayer);
-
-			if (multiplayer) {
-				glfwMakeContextCurrent(window2);
-				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the
-				m.currentPlayer = (Player) m.getEntities().get(1);
-				glLoadIdentity();
-				viewTarget = m.currentPlayer().getViewDirection();
-				GL11.glRotated(Math.toDegrees(viewTarget.get(2)), 1, 0, 0);
-				GL11.glRotated(Math.toDegrees(viewTarget.get(1)), 0, 1, 0);
-				mr.render(m);
-				glfwSwapBuffers(window2); // swap the color buffers
-
-				handleJoystick(m.currentPlayer);
+			for (Window window : windows) {
+				window.activate();
+				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+				for (PlayerData player : players) {
+					if (player.window == window) {
+						render(m, player, mr);
+					}
+				}
+				window.draw();
+				if(window.shouldClose()){
+					shallClose = true;
+				}
 			}
+
+			for (PlayerData player : players) {
+				player.updateControlls();
+			}
+
 			// Poll for window events. The key callback above will only be
 			// invoked during this call.
-			glfwPollEvents();
+			GLFW.glfwPollEvents();
 		}
 
 		// keyCallback.release();
 		mouseCallBack.release();
 	}
 
+	private static void setupWindow(Window window) {
+		window.activate();
+		GL11.glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+		GL11.glMatrixMode(GL11.GL_PROJECTION);
+		GL11.glLoadIdentity();
+		GL11.glMultMatrix(Mat.asTmpBufferGL(Mat.createPerspectiveMarix(60, 800.0 / 600, 0.1, 100)));
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		GL11.glLoadIdentity();
+		GL11.glEnable(GL11.GL_DEPTH_TEST);
+	}
+
+	private static void render(Maze maze, PlayerData player, MazeRenderer mazeRenderer) {
+		maze.currentPlayer = player.player;
+		int[] size = new int[2];
+		player.window.getSize(size);
+		int gridWidth = player.window.gridWidth;
+		int gridHeight = player.window.gridHeight;
+		int x = size[0] * player.x / gridWidth;
+		int y = size[1] * player.y / gridHeight;
+		int width = size[0] * player.width / gridWidth;
+		int height = size[1] * player.height / gridHeight;
+		GL11.glViewport(x, y, width, height);
+		GL11.glMatrixMode(GL11.GL_PROJECTION);
+		GL11.glLoadIdentity();
+		Mat4 tmp = Mat.createPerspectiveMarix(player.fovy, (double) width / height, 0.1, 100);
+		GL11.glMultMatrix(Mat.asTmpBufferGL(tmp));
+		GL11.glMatrixMode(GL11.GL_MODELVIEW);
+		GL11.glLoadIdentity();
+		Vec3 pos = player.player.getPos();
+		tmp = Mat.createRotationMarix(player.player.uplook(), 1, 0, 0);
+		GL11.glMultMatrix(Mat.asTmpBufferGL(tmp));
+		tmp = Mat.createLookAtMatrix(pos, pos.add(player.player.getViewDirection()), player.player.getUp());
+		GL11.glMultMatrix(Mat.asTmpBufferGL(tmp));
+		mazeRenderer.render();
+	}
+
 	private boolean bombJoystick;
 
-	public void handleJoystick(Player p) {
+	public void handleJoystick(long window, Player p) {
 		FloatBuffer b = GLFW.glfwGetJoystickAxes(GLFW.GLFW_JOYSTICK_1);
-		//PolarVec t = p.getViewDirection();
-		//t.set(1, t.get(1) + b.get(4) * 0.1);
-		// t.setComponent(2, Math.max(-Math.PI / 2, Math.min(Math.PI / 2,
-		// t.getComponent(2) + b.get(0) * 0.1)));
+		p.rotate(b.get(0)*b.get(0)*b.get(0) * 4);
+		p.uplook(b.get(1)*b.get(1)*b.get(1) * 4);
+		
 		ByteBuffer bb = GLFW.glfwGetJoystickButtons(GLFW.GLFW_JOYSTICK_1);
-		p.setForwardSpeed((bb.get(5) == 1 ? 2 : 1) * (-b.get(3)));
-		p.setSidewardSpeed((bb.get(5) == 1 ? 2 : 1) * b.get(0));
+		p.setForwardSpeed((bb.get(5) == 1 ? 2 : 1) * (-b.get(3)*b.get(3)*b.get(3)));
+		p.setSidewardSpeed((bb.get(5) == 1 ? 2 : 1) * b.get(4)*b.get(4)*b.get(4));
 
 		if (bb.get(4) == 1) {
 			if (!bombJoystick) {
@@ -276,11 +209,13 @@ public class RenderMain {
 		} else {
 			bombJoystick = false;
 		}
+		if (isPressed(window, GLFW.GLFW_KEY_ESCAPE))
+			shallClose = true;
 	}
 
 	private boolean space;
 
-	public void handleKeyboard(Player p) {
+	public void handleKeyboard(long window, Player p) {
 		boolean shift = isPressed(window, GLFW.GLFW_KEY_LEFT_SHIFT) || isPressed(window, GLFW.GLFW_KEY_RIGHT_SHIFT);
 		float speed = 0;
 		speed += isPressed(window, GLFW.GLFW_KEY_W) ? 1 : 0;
@@ -308,6 +243,85 @@ public class RenderMain {
 
 	private boolean isPressed(long window, int key) {
 		return GLFW.glfwGetKey(window, key) == GLFW.GLFW_PRESS;
+	}
+
+	private class PlayerData {
+		Player player;
+		Window window;
+		int x;
+		int y;
+		int width = 1;
+		int height = 1;
+		double fovy = 60;
+
+		public void updateControlls() {
+			if (players[0] == this) {
+				handleKeyboard(window.window, player);
+			} else {
+				handleJoystick(window.window, player);
+			}
+		}
+
+	}
+
+	private static class Window {
+
+		private static Window current;
+
+		private long window;
+
+		int gridWidth = 1;
+		int gridHeight = 1;
+
+		public Window(int width, int height, String title) {
+			GLFW.glfwDefaultWindowHints();
+			GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GL11.GL_FALSE);
+			window = GLFW.glfwCreateWindow(width, height, title, 0, 0);
+			if (window == 0) {
+				throw new RuntimeException("Failed to create the GLFW window");
+			}
+			activate();
+			GLContext.createFromCurrent();
+			GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
+			GLFW.glfwShowWindow(window);
+			GLFW.glfwSetCursorPos(window, 0, 0);
+		}
+
+		public boolean shouldClose() {
+			return GLFW.glfwWindowShouldClose(window)!=0;
+		}
+
+		private static final IntBuffer xpos = ByteBuffer.allocateDirect(4).order(ByteOrder.nativeOrder()).asIntBuffer();
+		private static final IntBuffer ypos = ByteBuffer.allocateDirect(4).order(ByteOrder.nativeOrder()).asIntBuffer();
+
+		public void getSize(int[] buff) {
+			if (buff.length != 2)
+				throw new IllegalArgumentException();
+			xpos.position(0);
+			ypos.position(0);
+			GLFW.glfwGetWindowSize(window, xpos, ypos);
+			buff[0] = xpos.get(0);
+			buff[1] = ypos.get(0);
+		}
+
+		public void draw() {
+			GLFW.glfwSwapBuffers(window);
+		}
+
+		public void activate() {
+			if (current != this) {
+				current = this;
+				GLFW.glfwMakeContextCurrent(window);
+			}
+		}
+
+		public void dispose() {
+			if (window != 0) {
+				GLFW.glfwDestroyWindow(window);
+				window = 0;
+			}
+		}
+
 	}
 
 }
