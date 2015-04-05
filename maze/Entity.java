@@ -69,7 +69,7 @@ public abstract class Entity {
 		//viewDirection.y(tmp);
 		// System.out.println(viewDirection);
 		//pos = pos.addScaled(rot.<Vec3>mul(viewDirection), speedForward * timeDelta / 1000_000_000d).addScaled(viewDirection, speedSideward * timeDelta / 1000_000_000d);
-		pos = pos.addScaled(rotation.mul(speed), timeDelta / 1000_000_000d);
+		pos = pos.addScaled(rotation.<Vec3>mul(speed), timeDelta / 1000_000_000d);
 	}
 
 	public void moveOutOfWall() {
@@ -216,7 +216,7 @@ public abstract class Entity {
 				return;
 			case STATIC :
 				default:
-				pos = pos.addScaled(rotation.mul(UP), -0.981 * dTime / 1000_000_000d);
+				pos = pos.addScaled(rotation.<Vec3>mul(UP), -0.981 * dTime / 1000_000_000d);
 				return;
 			//default :
 			//	break;
