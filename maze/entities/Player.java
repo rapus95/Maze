@@ -1,5 +1,8 @@
 package maze.entities;
 
+import org.lwjgl.system.MathUtil;
+
+import math.utils.MathUtils;
 import math.vecmat.Vec3;
 import maze.Entity;
 import maze.Gravity;
@@ -21,6 +24,8 @@ public class Player extends Entity {
 	private Vec3 startPos;
 
 	private long dieAni = -1;
+
+	private double upLook;
 
 	public Player(Maze m, Vec3 pos) {
 		super(m, pos);
@@ -50,9 +55,9 @@ public class Player extends Entity {
 			return true;
 		if (other instanceof Explosion)
 			die();
-		if(other instanceof Bomb){
-			other.setViewDirection(this.viewDirection);
-			other.setForwardSpeed(Math.max(1, this.speedForward));
+		if (other instanceof Bomb) {
+			// other.setViewDirection(this.forward);
+			// other.setForwardSpeed(Math.max(1, this.speedForward));
 		}
 		return super.onEntityCollide(other);
 	}
@@ -88,12 +93,20 @@ public class Player extends Entity {
 	}
 
 	public long getDieAni() {
-		return dieAni/2;
+		return dieAni / 2;
 	}
-	
+
 	@Override
 	public Gravity gravityType() {
 		return Gravity.DYNAMIC;
+	}
+
+	public void uplook(double d) {
+		upLook = MathUtils.clamp(upLook + d, -90, 90);
+	}
+
+	public double uplook() {
+		return upLook;
 	}
 
 }

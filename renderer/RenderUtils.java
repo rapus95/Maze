@@ -1,11 +1,10 @@
 package renderer;
 
+import static math.vecmat.Vec.Vec3;
+import static math.vecmat.Vec.asTmpBuffer;
 import math.vecmat.Vec3;
 
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.util.glu.Sphere;
-
-import static math.vecmat.Vec.*;
 
 public class RenderUtils {
 
@@ -58,8 +57,8 @@ public class RenderUtils {
 		GL11.glEnd();
 	}
 	
-	private static final Sphere s = new Sphere();
+	//private static final Sphere s = new Sphere();
 	public static void renderSphere(){
-		s.draw(1, 10, 10);
+		//s.draw(1, 10, 10);
 	}
 }

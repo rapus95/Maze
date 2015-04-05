@@ -52,7 +52,7 @@ public class MazeRenderer {
 		// Blocks
 		Vec3 currPos;
 		GL11.glPushMatrix();
-		GL11.glTranslated(-posX, -posY, -posZ);
+		//GL11.glTranslated(-posX, -posY, -posZ);
 		for (int x = leftXClip; x < rightXClip; x++) {
 			for (int y = leftYClip; y < rightYClip; y++) {
 				for (int z = leftZClip; z < rightZClip; z++) {
