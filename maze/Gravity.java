@@ -12,8 +12,7 @@ public enum Gravity {
 			case STATIC :
 				return DYNAMIC;
 			default :
-				return NONE;
-			
+				throw new AssertionError();
 		}
 	}
 }
