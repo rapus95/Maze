@@ -1,16 +1,22 @@
 package utils.control;
 
-public abstract class Binding implements Updateable {
+public class Binding implements Updateable {
 
 	protected double state;
 	protected double delta;
 
-	protected abstract double queryState(long window);
+	private final Key defaultKey;
 
-	@Override
+	private Key key;
+
+	Binding(Key defaultKey) {
+		this.defaultKey = defaultKey;
+		this.key = defaultKey;
+	}
+	
 	public void update(long window) {
-		double nstate = queryState(window);
-		delta = nstate-state;
+		double nstate = key.getState();
+		delta = nstate - state;
 		state = nstate;
 	}
 
@@ -23,15 +29,15 @@ public abstract class Binding implements Updateable {
 	}
 
 	public boolean isPressed() {
-		return state>0.5;
+		return state > 0.5;
 	}
 
 	public boolean isStartPressed() {
-		return delta>0.5;
+		return delta > 0.5;
 	}
 
 	public boolean isEndPressed() {
-		return delta<-0.5;
+		return delta < -0.5;
 	}
 
 }
