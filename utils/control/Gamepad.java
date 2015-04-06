@@ -10,7 +10,7 @@ public class Gamepad implements Updateable{
 	}
 
 	@Override
-	public void update(long window) {
+	public void update() {
 		// TODO Auto-generated method stub
 		
 	}

@@ -16,7 +16,7 @@ public class KeyboardKey implements Key {
 		public void invoke(long window, int key, int scancode, int action, int mods) {
 			KeyboardKey kk = KEYS.get(key);
 			if(kk!=null){
-				kk.state = action == GLFW.GLFW_PRESS;
+				kk.state = (action == GLFW.GLFW_PRESS || action == GLFW.GLFW_REPEAT);
 			}
 		}
 		
