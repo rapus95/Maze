@@ -25,7 +25,7 @@ public class Player extends Entity {
 
 	private double upLook;
 	
-	private Gravity currentGravityMode = Gravity.STATIC;
+	private Gravity currentGravityMode = Gravity.DYNAMIC;
 
 	public Player(Maze m, Vec3 pos) {
 		super(m, pos);

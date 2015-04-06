@@ -69,7 +69,9 @@ public abstract class Entity {
 			this.speed.y(this.speed.y() - timeDelta / 1000_000_000d-0.1);
 		}
 		pos = pos.addScaled(rotation.<Vec3>mul(speed), timeDelta / 1000_000_000d);
-		this.speed.y(this.speed.y()+0.1);
+		if (gravityType() != Gravity.NONE){
+			this.speed.y(this.speed.y()+0.1);
+		}
 	}
 
 	public void moveOutOfWall() {
