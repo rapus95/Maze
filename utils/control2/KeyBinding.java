@@ -34,11 +34,11 @@ public class KeyBinding {
 	}
 	
 	public boolean isStartPressed(){
-		return state>0.5;
+		return delta>0.5;
 	}
 	
 	public boolean isEndPressed(){
-		return state<-0.5;
+		return delta<-0.5;
 	}
 	
 }
