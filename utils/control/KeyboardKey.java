@@ -1,4 +1,4 @@
-package utils.control2;
+package utils.control;
 
 import org.lwjgl.glfw.GLFW;
 
@@ -11,7 +11,7 @@ public class KeyboardKey implements Key {
 	}
 	
 	@Override
-	public double getState(long window) {
+	public double getState() {
 		return GLFW.glfwGetKey(window, key)==GLFW.GLFW_PRESS?1:0;
 	}
 

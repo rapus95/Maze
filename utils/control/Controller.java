@@ -1,11 +1,11 @@
 package utils.control;
 
-public interface Controller {
+import org.lwjgl.glfw.GLFW;
 
-	public double getD(ControlType type);
-	public boolean getB(ControlType type);
+public class Controller {
+
+	public final Binding forward = new BindingPlus(new KeyboardKey(GLFW.GLFW_KEY_W));
 	
-	public static enum ControlType{
-		FORWARD, SIDEWARD, UPWARD, BOMB, GRAVITY_CHANGE, SPEED_MULTIPLIER, QUIT;
-	}
+	//...
+	
 }
