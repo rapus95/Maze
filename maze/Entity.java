@@ -201,7 +201,7 @@ public abstract class Entity {
 
 	public void fall(long dTime) {
 		if (gravityType() != Gravity.NONE)
-			pos = pos.addScaled(rotation.<Vec3> mul(UP), -0.981 * dTime / 1000_000_000d);
+			pos = pos.addScaled(getUp(), -0.981 * dTime / 1000_000_000d);
 	}
 
 	public Vec3 getUp() {

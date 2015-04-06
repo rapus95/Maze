@@ -124,7 +124,7 @@ public class RenderMain {
 
 		long lastNanoTime = System.nanoTime();
 		while (!shallClose) {
-
+			
 			m.tick(-(lastNanoTime - (lastNanoTime = System.nanoTime())));
 
 			for (Window window : windows) {
@@ -194,6 +194,7 @@ public class RenderMain {
 
 	public void handleJoystick(long window, Player p) {
 		FloatBuffer b = GLFW.glfwGetJoystickAxes(GLFW.GLFW_JOYSTICK_1);
+		
 		p.rotate(b.get(0)*b.get(0)*b.get(0) * 4);
 		p.uplook(b.get(1)*b.get(1)*b.get(1) * 4);
 		
@@ -213,7 +214,7 @@ public class RenderMain {
 			shallClose = true;
 	}
 
-	private boolean space;
+	private boolean space, lCtrl;
 
 	public void handleKeyboard(long window, Player p) {
 		boolean shift = isPressed(window, GLFW.GLFW_KEY_LEFT_SHIFT) || isPressed(window, GLFW.GLFW_KEY_RIGHT_SHIFT);
@@ -227,6 +228,15 @@ public class RenderMain {
 		speed += isPressed(window, GLFW.GLFW_KEY_A) ? -1 : 0;
 		speed *= shift ? 2 : 1;
 		p.setSidewardSpeed(speed);
+
+		if (isPressed(window, GLFW.GLFW_KEY_LEFT_CONTROL)) {
+			if (!lCtrl) {
+				p.toggleGravityMode();
+				lCtrl = true;
+			}
+		} else {
+			lCtrl = false;
+		}
 
 		if (isPressed(window, GLFW.GLFW_KEY_ESCAPE))
 			shallClose = true;
