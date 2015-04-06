@@ -24,6 +24,7 @@ import utils.control.Controller;
 import utils.control.Controller.ControlType;
 import utils.control.KeySet;
 import utils.control.Keyboard;
+import utils.control.KeyboardKey;
 
 public class RenderMain {
 
@@ -279,6 +280,7 @@ public class RenderMain {
 			activate();
 			GLContext.createFromCurrent();
 			GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
+			GLFW.glfwSetKeyCallback(window, KeyboardKey.KEY_CALLBACK);
 			GLFW.glfwShowWindow(window);
 			GLFW.glfwSetCursorPos(window, 0, 0);
 		}
