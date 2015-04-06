@@ -17,7 +17,7 @@ import net.Utils;
 
 public abstract class Entity {
 
-	private static final double MAX_DYNAMIC_CHANGE = 70;
+	private static final double MAX_DYNAMIC_CHANGE = 91;
 
 	private static final Vec3 FORWARD = Vec3(1, 0, 0);
 	private static final Vec3 UP = Vec3(0, 1, 0);
@@ -65,7 +65,11 @@ public abstract class Entity {
 	}
 
 	public void tick(long timeDelta) {
-		pos = pos.addScaled(rotation.<Vec3> mul(speed), timeDelta / 1000_000_000d);
+		if (gravityType() != Gravity.NONE){
+			this.speed.y(this.speed.y() - timeDelta / 1000_000_000d-0.1);
+		}
+		pos = pos.addScaled(rotation.<Vec3>mul(speed), timeDelta / 1000_000_000d);
+		this.speed.y(this.speed.y()+0.1);
 	}
 
 	public void moveOutOfWall() {
@@ -108,13 +112,16 @@ public abstract class Entity {
 			}
 		}
 		Vec3 out = mixFromHighestComponents(3, rOuter);
-		if (gravityType() == Gravity.DYNAMIC && !out.equals(Vec3(0, 0, 0))) {
-			Vec3 newDown = out.normalize();
-			Vec3 down = rotation.mul(DOWN);
-			Vec3 axis = newDown.cross(down);
-			double rot = Math.toDegrees(Math.acos(newDown.dot(down)));
-			if (rot != 0 && !Double.isNaN(rot) && Math.abs(rot) < MAX_DYNAMIC_CHANGE) {
-				rotation = rotation.mul(Mat.createRotationMarix3(rot, axis.x(), axis.y(), axis.z()));
+		if(!out.equals(Vec3(0, 0, 0))){
+			this.speed.y(0);
+			if (gravityType() == Gravity.DYNAMIC) {
+				Vec3 newDown = out.normalize();
+				Vec3 down = rotation.mul(DOWN);
+				Vec3 axis = newDown.cross(down);
+				double rot = Math.toDegrees(Math.acos(newDown.dot(down)));
+				if (rot != 0 && !Double.isNaN(rot) && Math.abs(rot) < MAX_DYNAMIC_CHANGE) {
+					rotation = rotation.mul(Mat.createRotationMarix3(rot, axis.x(), axis.y(), axis.z()));
+				}
 			}
 		}
 		this.pos = pos.sub(out);
@@ -139,6 +146,10 @@ public abstract class Entity {
 		this.speed.z(speed);
 	}
 
+	public void setUpSpeed(double speed) {
+		this.speed.y(speed);
+	}
+	
 	public Maze getMaze() {
 		return m;
 	}
@@ -176,6 +187,7 @@ public abstract class Entity {
 			this.pos = this.getPos().sub(mid).normalizeRandomIfPoint().mul(shouldDist / 2).add(mid);
 			other.pos = other.getPos().sub(mid).normalizeRandomIfPoint().mul(shouldDist / 2).add(mid);
 		}
+		this.speed.y(0);
 	}
 
 	public boolean isDead() {
@@ -199,10 +211,10 @@ public abstract class Entity {
 		// Utils.readVec(dataInputStream, this.down);
 	}
 
-	public void fall(long dTime) {
-		if (gravityType() != Gravity.NONE)
-			pos = pos.addScaled(getUp(), -0.981 * dTime / 1000_000_000d);
-	}
+	//public void fall(long dTime) {
+		//if (gravityType() != Gravity.NONE)
+			//pos = pos.addScaled(getUp(), -0.981 * dTime / 1000_000_000d);
+	//}
 
 	public Vec3 getUp() {
 		return rotation.<Vec3> mul(UP);

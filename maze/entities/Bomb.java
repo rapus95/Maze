@@ -18,12 +18,15 @@ public class Bomb extends Entity {
 
 	private boolean exploded;
 
-	public Bomb(Maze m, Vec3 pos, Mat3 rotation, Player player, double power, double time) {
+	private Gravity currentGravityMode;
+	
+	public Bomb(Maze m, Vec3 pos, Mat3 rotation, Player player, double power, double time, Gravity currentGravityMode) {
 		super(m, pos);
 		this.player = player;
 		this.power = power;
 		this.time = time;
 		this.rotation = rotation;
+		this.currentGravityMode = currentGravityMode;
 	}
 
 	@Override
@@ -106,8 +109,7 @@ public class Bomb extends Entity {
 
 	@Override
 	public Gravity gravityType() {
-		// TODO static or dynamic or how to choose?
-		return Gravity.STATIC;
+		return currentGravityMode;
 	}
 
 }

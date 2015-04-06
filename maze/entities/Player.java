@@ -37,7 +37,7 @@ public class Player extends Entity {
 			return;
 		if (currBombAmount >= bombAmount)
 			return;
-		m.spawnEntity(new Bomb(m, pos, rotation, this, bombPower, 4));
+		m.spawnEntity(new Bomb(m, pos, rotation, this, bombPower, 4, currentGravityMode));
 		currBombAmount++;
 	}
 

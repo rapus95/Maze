@@ -214,7 +214,7 @@ public class RenderMain {
 			shallClose = true;
 	}
 
-	private boolean space, lCtrl;
+	private boolean space, lCtrl, e;
 
 	public void handleKeyboard(long window, Player p) {
 		boolean shift = isPressed(window, GLFW.GLFW_KEY_LEFT_SHIFT) || isPressed(window, GLFW.GLFW_KEY_RIGHT_SHIFT);
@@ -231,19 +231,28 @@ public class RenderMain {
 
 		if (isPressed(window, GLFW.GLFW_KEY_LEFT_CONTROL)) {
 			if (!lCtrl) {
-				p.toggleGravityMode();
+				p.placeBomb();
 				lCtrl = true;
 			}
 		} else {
 			lCtrl = false;
 		}
-
+		
+		if (isPressed(window, GLFW.GLFW_KEY_E)) {
+			if (!e) {
+				p.toggleGravityMode();
+				e = true;
+			}
+		} else {
+			e = false;
+		}
+		
 		if (isPressed(window, GLFW.GLFW_KEY_ESCAPE))
 			shallClose = true;
 
 		if (isPressed(window, GLFW.GLFW_KEY_SPACE)) {
 			if (!space) {
-				p.placeBomb();
+				p.setUpSpeed(1);
 				space = true;
 			}
 		} else {

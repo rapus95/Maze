@@ -102,10 +102,10 @@ public class Maze {
 			e.tick(deltaTime);
 		}
 		int size = entityList.size();
-		for (int i = 0; i < entityList.size(); i++) {
-			Entity e = entityList.get(i);
-			e.fall(deltaTime);
-		}
+		//for (int i = 0; i < entityList.size(); i++) {
+			//Entity e = entityList.get(i);
+			//e.fall(deltaTime);
+		//}
 		for (int i = 0; i < entityList.size(); i++) {
 			Entity e = entityList.get(i);
 			for (int j = i + 1; j < size; j++) {
