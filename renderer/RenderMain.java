@@ -95,9 +95,9 @@ public class RenderMain {
 
 		Maze m = new Maze(players.length);
 		MazeRenderer mr = new MazeRenderer(m);
-		players[0].player = m.currentPlayer();
+		players[0].setPlayer(m.currentPlayer());
 		for (int i = 1; i < players.length; i++) {
-			players[i].player = (Player) m.getEntities().get(i);
+			players[i].setPlayer((Player) m.getEntities().get(i));
 		}
 
 		GLFWCursorPosCallback mouseCallBack = new GLFWCursorPosCallback() {
