@@ -20,6 +20,11 @@ import org.lwjgl.glfw.GLFWvidmode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GLContext;
 
+import utils.control.Controller;
+import utils.control.Controller.ControlType;
+import utils.control.KeySet;
+import utils.control.Keyboard;
+
 public class RenderMain {
 
 	private GLFWErrorCallback errorCallback;
@@ -72,17 +77,15 @@ public class RenderMain {
 		if (windows.length > 1)
 			GLFW.glfwSetWindowPos(windows[1].window, (GLFWvidmode.width(vidmode) - WIDTH) / 2 + WIDTH / 2 + 50, (GLFWvidmode.height(vidmode) - HEIGHT) / 4);
 
-		players[0] = new PlayerData();
-		players[0].window = windows[0];
+		players[0] = new PlayerData(null, windows[0], new Keyboard(KeySet.WASD_DEFAULT_KEYSET));
 
 		if (players.length == 2) {
-			players[1] = new PlayerData();
 			if (windows.length == 1) {
-				players[1].window = windows[0];
+				players[1] = new PlayerData(null, windows[0], null);
 				windows[0].gridWidth = 2;
-				players[1].x = 1;
+				players[1].vp.x = 1;
 			} else {
-				players[1].window = windows[1];
+				players[1] = new PlayerData(null, windows[1], null);
 			}
 		}
 
@@ -93,10 +96,10 @@ public class RenderMain {
 		Maze m = new Maze(players.length);
 		MazeRenderer mr = new MazeRenderer(m);
 		players[0].player = m.currentPlayer();
-		for(int i=1; i<players.length; i++){
+		for (int i = 1; i < players.length; i++) {
 			players[i].player = (Player) m.getEntities().get(i);
 		}
-		
+
 		GLFWCursorPosCallback mouseCallBack = new GLFWCursorPosCallback() {
 
 			Player p;
@@ -124,7 +127,7 @@ public class RenderMain {
 
 		long lastNanoTime = System.nanoTime();
 		while (!shallClose) {
-			
+
 			m.tick(-(lastNanoTime - (lastNanoTime = System.nanoTime())));
 
 			for (Window window : windows) {
@@ -136,13 +139,13 @@ public class RenderMain {
 					}
 				}
 				window.draw();
-				if(window.shouldClose()){
+				if (window.shouldClose()) {
 					shallClose = true;
 				}
 			}
 
 			for (PlayerData player : players) {
-				player.updateControlls();
+				player.updateControls();
 			}
 
 			// Poll for window events. The key callback above will only be
@@ -171,14 +174,14 @@ public class RenderMain {
 		player.window.getSize(size);
 		int gridWidth = player.window.gridWidth;
 		int gridHeight = player.window.gridHeight;
-		int x = size[0] * player.x / gridWidth;
-		int y = size[1] * player.y / gridHeight;
-		int width = size[0] * player.width / gridWidth;
-		int height = size[1] * player.height / gridHeight;
+		int x = size[0] * player.vp.x / gridWidth;
+		int y = size[1] * player.vp.y / gridHeight;
+		int width = size[0] * player.vp.width / gridWidth;
+		int height = size[1] * player.vp.height / gridHeight;
 		GL11.glViewport(x, y, width, height);
 		GL11.glMatrixMode(GL11.GL_PROJECTION);
 		GL11.glLoadIdentity();
-		Mat4 tmp = Mat.createPerspectiveMarix(player.fovy, (double) width / height, 0.1, 100);
+		Mat4 tmp = Mat.createPerspectiveMarix(player.vp.fovy, (double) width / height, 0.1, 100);
 		GL11.glMultMatrix(Mat.asTmpBufferGL(tmp));
 		GL11.glMatrixMode(GL11.GL_MODELVIEW);
 		GL11.glLoadIdentity();
@@ -194,13 +197,13 @@ public class RenderMain {
 
 	public void handleJoystick(long window, Player p) {
 		FloatBuffer b = GLFW.glfwGetJoystickAxes(GLFW.GLFW_JOYSTICK_1);
-		
-		p.rotate(b.get(0)*b.get(0)*b.get(0) * 4);
-		p.uplook(b.get(1)*b.get(1)*b.get(1) * 4);
-		
+
+		p.rotate(b.get(0) * b.get(0) * b.get(0) * 4);
+		p.uplook(b.get(1) * b.get(1) * b.get(1) * 4);
+
 		ByteBuffer bb = GLFW.glfwGetJoystickButtons(GLFW.GLFW_JOYSTICK_1);
-		p.setForwardSpeed((bb.get(5) == 1 ? 2 : 1) * (-b.get(3)*b.get(3)*b.get(3)));
-		p.setSidewardSpeed((bb.get(5) == 1 ? 2 : 1) * b.get(4)*b.get(4)*b.get(4));
+		p.setForwardSpeed((bb.get(5) == 1 ? 2 : 1) * (-b.get(3) * b.get(3) * b.get(3)));
+		p.setSidewardSpeed((bb.get(5) == 1 ? 2 : 1) * b.get(4) * b.get(4) * b.get(4));
 
 		if (bb.get(4) == 1) {
 			if (!bombJoystick) {
@@ -210,77 +213,51 @@ public class RenderMain {
 		} else {
 			bombJoystick = false;
 		}
-		if (isPressed(window, GLFW.GLFW_KEY_ESCAPE))
-			shallClose = true;
-	}
-
-	private boolean space, lCtrl, e;
-
-	public void handleKeyboard(long window, Player p) {
-		boolean shift = isPressed(window, GLFW.GLFW_KEY_LEFT_SHIFT) || isPressed(window, GLFW.GLFW_KEY_RIGHT_SHIFT);
-		float speed = 0;
-		speed += isPressed(window, GLFW.GLFW_KEY_W) ? 1 : 0;
-		speed += isPressed(window, GLFW.GLFW_KEY_S) ? -1 : 0;
-		speed *= shift ? 2 : 1;
-		p.setForwardSpeed(speed);
-		speed = 0;
-		speed += isPressed(window, GLFW.GLFW_KEY_D) ? 1 : 0;
-		speed += isPressed(window, GLFW.GLFW_KEY_A) ? -1 : 0;
-		speed *= shift ? 2 : 1;
-		p.setSidewardSpeed(speed);
-
-		if (isPressed(window, GLFW.GLFW_KEY_LEFT_CONTROL)) {
-			if (!lCtrl) {
-				p.placeBomb();
-				lCtrl = true;
-			}
-		} else {
-			lCtrl = false;
-		}
-		
-		if (isPressed(window, GLFW.GLFW_KEY_E)) {
-			if (!e) {
-				p.toggleGravityMode();
-				e = true;
-			}
-		} else {
-			e = false;
-		}
-		
-		if (isPressed(window, GLFW.GLFW_KEY_ESCAPE))
-			shallClose = true;
-
-		if (isPressed(window, GLFW.GLFW_KEY_SPACE)) {
-			if (!space) {
-				p.setUpSpeed(1);
-				space = true;
-			}
-		} else {
-			space = false;
-		}
-	}
-
-	private boolean isPressed(long window, int key) {
-		return GLFW.glfwGetKey(window, key) == GLFW.GLFW_PRESS;
+		// if (isPressed(window, GLFW.GLFW_KEY_ESCAPE))
+		// shallClose = true;
 	}
 
 	private class PlayerData {
-		Player player;
-		Window window;
+		private Player player;
+		private final Window window;
+		private final Controller controller;
+		private final Viewport vp = new Viewport();
+
+		private PlayerData(Player p, Window w, Controller c) {
+			this.player = p;
+			this.window = w;
+			this.controller = c;
+		}
+
+		private void setPlayer(Player p) {
+			if (this.player == null)
+				this.player = p;
+		}
+
+		public void updateControls() {
+			double tmp;
+			if (controller instanceof Keyboard) {
+				((Keyboard) controller).setWindow(this.window.window);
+			}
+			if (controller.getB(ControlType.QUIT))
+				shallClose = true;
+			player.setForwardSpeed(controller.getD(ControlType.FORWARD));
+			player.setSidewardSpeed(controller.getD(ControlType.SIDEWARD));
+			if ((tmp = controller.getD(ControlType.UPWARD)) != 0)
+				player.setUpSpeed(tmp);
+			if (controller.getB(ControlType.BOMB))
+				player.placeBomb();
+			if (controller.getB(ControlType.GRAVITY_CHANGE))
+				player.toggleGravityMode();
+		}
+	}
+
+	private static class Viewport {
 		int x;
 		int y;
 		int width = 1;
 		int height = 1;
 		double fovy = 60;
-
-		public void updateControlls() {
-			if (players[0] == this) {
-				handleKeyboard(window.window, player);
-			} else {
-				handleJoystick(window.window, player);
-			}
-		}
-
 	}
 
 	private static class Window {
@@ -307,7 +284,7 @@ public class RenderMain {
 		}
 
 		public boolean shouldClose() {
-			return GLFW.glfwWindowShouldClose(window)!=0;
+			return GLFW.glfwWindowShouldClose(window) != 0;
 		}
 
 		private static final IntBuffer xpos = ByteBuffer.allocateDirect(4).order(ByteOrder.nativeOrder()).asIntBuffer();
