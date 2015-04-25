@@ -9,7 +9,7 @@ public class Binding implements Updateable {
 
 	private Key key;
 
-	Binding(Key defaultKey) {
+	public Binding(Key defaultKey) {
 		this.defaultKey = defaultKey;
 		this.key = defaultKey;
 	}

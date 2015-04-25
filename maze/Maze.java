@@ -114,7 +114,7 @@ public class Maze {
 					e.onEntityCollideWith(e2);
 				}
 			}
-			e.moveOutOfWall();
+			e.moveOutOfWall(deltaTime / 1000_000_000d);
 		}
 		Iterator<Entity> it = entityList.iterator();
 		while (it.hasNext()) {

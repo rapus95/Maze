@@ -20,11 +20,11 @@ import org.lwjgl.glfw.GLFWvidmode;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GLContext;
 
+import utils.control.Binding;
 import utils.control.Controller;
-import utils.control.Controller.ControlType;
-import utils.control.KeySet;
-import utils.control.Keyboard;
+import utils.control.Gamepad;
 import utils.control.KeyboardKey;
+import utils.control.CursorKey;
 
 public class RenderMain {
 
@@ -78,7 +78,7 @@ public class RenderMain {
 		if (windows.length > 1)
 			GLFW.glfwSetWindowPos(windows[1].window, (GLFWvidmode.width(vidmode) - WIDTH) / 2 + WIDTH / 2 + 50, (GLFWvidmode.height(vidmode) - HEIGHT) / 4);
 
-		players[0] = new PlayerData(null, windows[0], new Keyboard(KeySet.WASD_DEFAULT_KEYSET));
+		players[0] = new PlayerData(null, windows[0], new Controller());
 
 		if (players.length == 2) {
 			if (windows.length == 1) {
@@ -101,33 +101,35 @@ public class RenderMain {
 			players[i].setPlayer((Player) m.getEntities().get(i));
 		}
 
-		GLFWCursorPosCallback mouseCallBack = new GLFWCursorPosCallback() {
-
-			Player p;
-
-			public GLFWCursorPosCallback setMaze(Maze m) {
-				this.p = m.currentPlayer();
-				return this;
-			}
-
-			@Override
-			public void invoke(long window, double xpos, double ypos) {
-				double xd = xpos;
-				double yd = ypos;
-				p.rotate(xd * 0.1);
-				p.uplook(yd * 0.1);
-				GLFW.glfwSetCursorPos(window, 0, 0);
-			}
-		}.setMaze(m);
-
-		GLFW.glfwSetCursorPosCallback(windows[0].window, mouseCallBack);
+//		GLFWCursorPosCallback mouseCallBack = new GLFWCursorPosCallback() {
+//
+//			Player p;
+//
+//			public GLFWCursorPosCallback setMaze(Maze m) {
+//				this.p = m.currentPlayer();
+//				return this;
+//			}
+//
+//			@Override
+//			public void invoke(long window, double xpos, double ypos) {
+//				double xd = xpos;
+//				double yd = ypos;
+//				p.rotate(xd * 0.1);
+//				p.uplook(yd * 0.1);
+//				GLFW.glfwSetCursorPos(window, 0, 0);
+//			}
+//		}.setMaze(m);
+//
+//		GLFW.glfwSetCursorPosCallback(windows[0].window, mouseCallBack);
 
 		for (Window window : windows) {
 			setupWindow(window);
 		}
 
+		CursorKey.setCatch(true);
+		
 		long lastNanoTime = System.nanoTime();
-		while (!shallClose) {
+		while (!shallClose && exit.getState() == 0) {
 
 			m.tick(-(lastNanoTime - (lastNanoTime = System.nanoTime())));
 
@@ -145,17 +147,20 @@ public class RenderMain {
 				}
 			}
 
+			GLFW.glfwPollEvents();
+
+			CursorKey.update();
+			Gamepad.update();
+			
+			exit.update();
 			for (PlayerData player : players) {
 				player.updateControls();
 			}
 
-			// Poll for window events. The key callback above will only be
-			// invoked during this call.
-			GLFW.glfwPollEvents();
 		}
 
-		// keyCallback.release();
-		mouseCallBack.release();
+		KeyboardKey.KEY_CALLBACK.release();
+		CursorKey.CURSOR_CALLBACK.release();
 	}
 
 	private static void setupWindow(Window window) {
@@ -218,6 +223,8 @@ public class RenderMain {
 		// shallClose = true;
 	}
 
+	public final Binding exit = new Binding(KeyboardKey.getKey(GLFW.GLFW_KEY_ESCAPE));
+
 	private class PlayerData {
 		private Player player;
 		private final Window window;
@@ -236,20 +243,34 @@ public class RenderMain {
 		}
 
 		public void updateControls() {
-			double tmp;
-			if (controller instanceof Keyboard) {
-				((Keyboard) controller).setWindow(this.window.window);
+			controller.update();
+			player.rotate(controller.rotateRight.getState()-controller.rotateLeft.getState());
+			player.uplook(controller.rotateUp.getState()-controller.rotateDown.getState());
+			player.setForwardSpeed(controller.forward.getState()-controller.backward.getState());
+			player.setSidewardSpeed(controller.right.getState()-controller.left.getState());
+			if(controller.jump.isStartPressed()){
+				player.setUpSpeed(1);
 			}
-			if (controller.getB(ControlType.QUIT))
-				shallClose = true;
-			player.setForwardSpeed(controller.getD(ControlType.FORWARD));
-			player.setSidewardSpeed(controller.getD(ControlType.SIDEWARD));
-			if ((tmp = controller.getD(ControlType.UPWARD)) != 0)
-				player.setUpSpeed(tmp);
-			if (controller.getB(ControlType.BOMB))
+			if(controller.shoot.isStartPressed()){
 				player.placeBomb();
-			if (controller.getB(ControlType.GRAVITY_CHANGE))
+			}
+			if(controller.cheet_changeGravity.isStartPressed()){
 				player.toggleGravityMode();
+			}
+			// double tmp;
+			// if (controller instanceof Keyboard) {
+			// ((Keyboard) controller).setWindow(this.window.window);
+			// }
+			// if (controller.getB(ControlType.QUIT))
+			// shallClose = true;
+			// player.setForwardSpeed(controller.getD(ControlType.FORWARD));
+			// player.setSidewardSpeed(controller.getD(ControlType.SIDEWARD));
+			// if ((tmp = controller.getD(ControlType.UPWARD)) != 0)
+			// player.setUpSpeed(tmp);
+			// if (controller.getB(ControlType.BOMB))
+			// player.placeBomb();
+			// if (controller.getB(ControlType.GRAVITY_CHANGE))
+			// player.toggleGravityMode();
 		}
 	}
 
@@ -281,6 +302,7 @@ public class RenderMain {
 			GLContext.createFromCurrent();
 			GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
 			GLFW.glfwSetKeyCallback(window, KeyboardKey.KEY_CALLBACK);
+			GLFW.glfwSetCursorPosCallback(window, CursorKey.CURSOR_CALLBACK);
 			GLFW.glfwShowWindow(window);
 			GLFW.glfwSetCursorPos(window, 0, 0);
 		}

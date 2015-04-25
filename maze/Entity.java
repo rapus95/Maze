@@ -17,7 +17,7 @@ import net.Utils;
 
 public abstract class Entity {
 
-	private static final double MAX_DYNAMIC_CHANGE = 91;
+	private static final double MAX_DYNAMIC_CHANGE = 89;
 
 	private static final Vec3 FORWARD = Vec3(1, 0, 0);
 	private static final Vec3 UP = Vec3(0, 1, 0);
@@ -74,7 +74,7 @@ public abstract class Entity {
 		}
 	}
 
-	public void moveOutOfWall() {
+	public void moveOutOfWall(double dt) {
 		if (!canCollideWithWall())
 			return;
 
@@ -89,6 +89,7 @@ public abstract class Entity {
 				&& !m.isWall(pos))
 			return;
 		Vec3 rOuter[] = new Vec3[27], tmp;
+		Vec3 up = Vec3();
 		for (int i = -1; i <= 1; i++) {
 			for (int j = -1; j <= 1; j++) {
 				for (int k = -1; k <= 1; k++) {
@@ -107,6 +108,11 @@ public abstract class Entity {
 								shortestDistanceToRectangle(xnynzp, xpynzp, xpypzp, xnypzp), shortestDistanceToRectangle(xnynzn, xnynzp, xnypzp, xnypzn),
 								shortestDistanceToRectangle(xpynzn, xpypzn, xpypzp, xpynzp), shortestDistanceToRectangle(xnynzn, xpynzn, xpynzp, xnynzp),
 								shortestDistanceToRectangle(xnypzn, xnypzp, xpypzp, xpypzn) };
+						Vec3 nInner[] = { getNormalOnCollide(xnynzn, xnypzn, xpypzn, xpynzn),
+								getNormalOnCollide(xnynzp, xpynzp, xpypzp, xnypzp), getNormalOnCollide(xnynzn, xnynzp, xnypzp, xnypzn),
+								getNormalOnCollide(xpynzn, xpypzn, xpypzp, xpynzp), getNormalOnCollide(xnynzn, xpynzn, xpynzp, xnynzp),
+								getNormalOnCollide(xnypzn, xnypzp, xpypzp, xpypzn) };
+						up = up.add(Vec3.sumUp(3, nInner));
 						rOuter[3 * (3 * (i + 1) + (j + 1)) + (k + 1)] = mixFromHighestComponents(3, rInner);
 
 					}
@@ -114,14 +120,17 @@ public abstract class Entity {
 			}
 		}
 		Vec3 out = mixFromHighestComponents(3, rOuter);
-		if(!out.equals(Vec3(0, 0, 0))){
+		if(!up.equals(Vec3(0, 0, 0))){
 			this.speed.y(0);
 			if (gravityType() == Gravity.DYNAMIC) {
-				Vec3 newDown = out.normalize();
+				Vec3 newDown = up.neg().normalize();
 				Vec3 down = rotation.mul(DOWN);
 				Vec3 axis = newDown.cross(down);
 				double rot = Math.toDegrees(Math.acos(newDown.dot(down)));
 				if (rot != 0 && !Double.isNaN(rot) && Math.abs(rot) < MAX_DYNAMIC_CHANGE) {
+					double maxrot = 360*dt;
+					if(rot>maxrot)
+						rot = maxrot;
 					rotation = rotation.mul(Mat.createRotationMarix3(rot, axis.x(), axis.y(), axis.z()));
 				}
 			}
@@ -136,6 +145,16 @@ public abstract class Entity {
 		if (v != null/* && (tmp=v.distanceTo(pos)) < size */) {
 			v = v.sub(pos);
 			return v.normalizeToLength(size).sub(v);
+		}
+		return null;
+	}
+	
+	private Vec3 getNormalOnCollide(Vec3 p1, Vec3 p2, Vec3 p3, Vec3 p4) {
+		double size = getSize();
+		Vec3 pos = getPos();
+		Vec3 v = Physics.intersectRect(p1, p2, p3, pos, size);
+		if (v != null) {
+			return Physics.getNormal(p1, p2, p3);
 		}
 		return null;
 	}
