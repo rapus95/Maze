@@ -39,10 +39,10 @@ public class RenderUtils {
 	
 	private static void renderFace(Vec3 v1, Vec3 v2, Vec3 v3, Vec3 v4){
 		GL11.glBegin(GL11.GL_QUADS);
-		GL11.glVertex3(asTmpBuffer(v1));
-		GL11.glVertex3(asTmpBuffer(v2));
-		GL11.glVertex3(asTmpBuffer(v3));
-		GL11.glVertex3(asTmpBuffer(v4));
+		GL11.glVertex3dv(asTmpBuffer(v1));
+		GL11.glVertex3dv(asTmpBuffer(v2));
+		GL11.glVertex3dv(asTmpBuffer(v3));
+		GL11.glVertex3dv(asTmpBuffer(v4));
 		GL11.glEnd();
 //		renderNormal(v1, v2, v3);
 	}
@@ -52,8 +52,8 @@ public class RenderUtils {
 		Vec3 center = v1.add(v2).add(v3).div(3);
 		GL11.glColor3d(0, 0, 0);
 		GL11.glBegin(GL11.GL_LINES);
-		GL11.glVertex3(asTmpBuffer(center));
-		GL11.glVertex3(asTmpBuffer(center.add(n)));
+		GL11.glVertex3dv(asTmpBuffer(center));
+		GL11.glVertex3dv(asTmpBuffer(center.add(n)));
 		GL11.glEnd();
 	}
 	

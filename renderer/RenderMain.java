@@ -1,9 +1,7 @@
 package renderer;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 
 import math.vecmat.Mat;
 import math.vecmat.Mat4;
@@ -11,20 +9,19 @@ import math.vecmat.Vec3;
 import maze.Maze;
 import maze.entities.Player;
 
-import org.lwjgl.Sys;
 import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWCursorPosCallback;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWvidmode;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GLContext;
 
-import utils.control.Binding;
-import utils.control.Controller;
-import utils.control.Gamepad;
-import utils.control.KeyboardKey;
-import utils.control.CursorKey;
+import utils.GameController;
+import window.Viewport;
+import window.WindowManager;
+import control.Binding;
+import control.CursorKey;
+import control.Gamepad;
+import control.KeyboardKey;
 
 public class RenderMain {
 
@@ -32,20 +29,15 @@ public class RenderMain {
 
 	private boolean shallClose = false;
 
-	private Window[] windows = new Window[1];
+	private WindowManager manager = new WindowManager(2);
 
-	private PlayerData[] players = new PlayerData[1];
+	private PlayerData[] players = new PlayerData[2];
 
 	public void run() {
-		System.out.println("Hello LWJGL " + Sys.getVersion() + "!");
-
 		try {
 			init();
 			loop();
 
-			for (Window window : windows) {
-				window.dispose();
-			}
 
 		} finally {
 			// Terminate GLFW and release the GLFWerrorfun
@@ -66,27 +58,26 @@ public class RenderMain {
 		int WIDTH = 800;
 		int HEIGHT = 600;
 
-		for (int i = 0; i < windows.length; i++) {
-			windows[i] = new Window(WIDTH, HEIGHT, "Player1");
+		for (int i = 0; i < manager.getWindowCount(); i++) {
+			manager.createWindow(i, WIDTH, HEIGHT, "Player"+(i+1));
 		}
 
 		// Get the resolution of the primary monitor
 		ByteBuffer vidmode = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor());
 		// Center our window
-		GLFW.glfwSetWindowPos(windows[0].window, (GLFWvidmode.width(vidmode) - WIDTH) / 2 - WIDTH / 2 - 50, (GLFWvidmode.height(vidmode) - HEIGHT) / 4);
+		manager.setPosition(0, (GLFWvidmode.width(vidmode) - WIDTH) / 2 - WIDTH / 2 - 50, (GLFWvidmode.height(vidmode) - HEIGHT) / 4);
 
-		if (windows.length > 1)
-			GLFW.glfwSetWindowPos(windows[1].window, (GLFWvidmode.width(vidmode) - WIDTH) / 2 + WIDTH / 2 + 50, (GLFWvidmode.height(vidmode) - HEIGHT) / 4);
+		if (manager.getWindowCount() > 1)
+			manager.setPosition(1, (GLFWvidmode.width(vidmode) - WIDTH) / 2 + WIDTH / 2 + 50, (GLFWvidmode.height(vidmode) - HEIGHT) / 4);
 
-		players[0] = new PlayerData(null, windows[0], new Controller());
+		players[0] = new PlayerData(null, new Viewport(manager, 0, 0, 0), new GameController());
 
 		if (players.length == 2) {
-			if (windows.length == 1) {
-				players[1] = new PlayerData(null, windows[0], null);
-				windows[0].gridWidth = 2;
-				players[1].vp.x = 1;
+			if (manager.getWindowCount() == 1) {
+				players[1] = new PlayerData(null, new Viewport(manager, 0, 1, 0), null);
+				manager.getWindow(0).setGridWidth(2);
 			} else {
-				players[1] = new PlayerData(null, windows[1], null);
+				players[1] = new PlayerData(null, new Viewport(manager, 1, 0, 0), null);
 			}
 		}
 
@@ -122,9 +113,7 @@ public class RenderMain {
 //
 //		GLFW.glfwSetCursorPosCallback(windows[0].window, mouseCallBack);
 
-		for (Window window : windows) {
-			setupWindow(window);
-		}
+		manager.setupWindow(-1, Mat.asTmpBufferGL(Mat.createPerspectiveMarix(60, 800.0 / 600, 0.1, 100)));
 
 		CursorKey.setCatch(true);
 		
@@ -133,16 +122,15 @@ public class RenderMain {
 
 			m.tick(-(lastNanoTime - (lastNanoTime = System.nanoTime())));
 
-			for (Window window : windows) {
-				window.activate();
-				GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+			for (int i=0; i<manager.getWindowCount(); i++) {
+				manager.activateWindow(i).clearWindow(i);
 				for (PlayerData player : players) {
-					if (player.window == window) {
+					if (player.vp.getIndex() == i) {
 						render(m, player, mr);
 					}
 				}
-				window.draw();
-				if (window.shouldClose()) {
+				manager.drawWindow(i);
+				if (manager.shallCloseWindow(i)) {
 					shallClose = true;
 				}
 			}
@@ -163,39 +151,15 @@ public class RenderMain {
 		CursorKey.CURSOR_CALLBACK.release();
 	}
 
-	private static void setupWindow(Window window) {
-		window.activate();
-		GL11.glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-		GL11.glMatrixMode(GL11.GL_PROJECTION);
-		GL11.glLoadIdentity();
-		GL11.glMultMatrix(Mat.asTmpBufferGL(Mat.createPerspectiveMarix(60, 800.0 / 600, 0.1, 100)));
-		GL11.glMatrixMode(GL11.GL_MODELVIEW);
-		GL11.glLoadIdentity();
-		GL11.glEnable(GL11.GL_DEPTH_TEST);
-	}
-
 	private static void render(Maze maze, PlayerData player, MazeRenderer mazeRenderer) {
 		maze.currentPlayer = player.player;
-		int[] size = new int[2];
-		player.window.getSize(size);
-		int gridWidth = player.window.gridWidth;
-		int gridHeight = player.window.gridHeight;
-		int x = size[0] * player.vp.x / gridWidth;
-		int y = size[1] * player.vp.y / gridHeight;
-		int width = size[0] * player.vp.width / gridWidth;
-		int height = size[1] * player.vp.height / gridHeight;
-		GL11.glViewport(x, y, width, height);
-		GL11.glMatrixMode(GL11.GL_PROJECTION);
-		GL11.glLoadIdentity();
-		Mat4 tmp = Mat.createPerspectiveMarix(player.vp.fovy, (double) width / height, 0.1, 100);
-		GL11.glMultMatrix(Mat.asTmpBufferGL(tmp));
-		GL11.glMatrixMode(GL11.GL_MODELVIEW);
-		GL11.glLoadIdentity();
+		Viewport v = player.vp;
+		v.setPerspective(Mat.asTmpBufferGL(Mat.createPerspectiveMarix(60, (double) v.getWidth() / v.getHeight(), 0.1, 100)));
+		v.activate();
 		Vec3 pos = player.player.getPos();
-		tmp = Mat.createRotationMarix(player.player.uplook(), 1, 0, 0);
-		GL11.glMultMatrix(Mat.asTmpBufferGL(tmp));
-		tmp = Mat.createLookAtMatrix(pos, pos.add(player.player.getViewDirection()), player.player.getUp());
-		GL11.glMultMatrix(Mat.asTmpBufferGL(tmp));
+		Mat4 tmp;
+		tmp = Mat.createRotationMarix(player.player.uplook(), 1, 0, 0).mul(Mat.createLookAtMatrix(pos, pos.add(player.player.getViewDirection()), player.player.getUp()));
+		GL11.glMultMatrixd(Mat.asTmpBufferGL(tmp));
 		mazeRenderer.render();
 	}
 
@@ -223,26 +187,27 @@ public class RenderMain {
 		// shallClose = true;
 	}
 
-	public final Binding exit = new Binding(KeyboardKey.getKey(GLFW.GLFW_KEY_ESCAPE));
+	public final Binding exit = Binding.createAndDefault(KeyboardKey.getKey(GLFW.GLFW_KEY_ESCAPE));
 
 	private class PlayerData {
 		private Player player;
-		private final Window window;
-		private final Controller controller;
-		private final Viewport vp = new Viewport();
+		private final GameController controller;
+		private final Viewport vp;
 
-		private PlayerData(Player p, Window w, Controller c) {
+		private PlayerData(Player p, Viewport vp, GameController c) {
 			this.player = p;
-			this.window = w;
 			this.controller = c;
+			this.vp = vp;
 		}
-
+		
 		private void setPlayer(Player p) {
 			if (this.player == null)
 				this.player = p;
 		}
 
 		public void updateControls() {
+			if(controller==null)
+				return;
 			controller.update();
 			player.rotate(controller.rotateRight.getState()-controller.rotateLeft.getState());
 			player.uplook(controller.rotateUp.getState()-controller.rotateDown.getState());
@@ -254,7 +219,7 @@ public class RenderMain {
 			if(controller.shoot.isStartPressed()){
 				player.placeBomb();
 			}
-			if(controller.cheet_changeGravity.isStartPressed()){
+			if(controller.cheat_changeGravity.isStartPressed()){
 				player.toggleGravityMode();
 			}
 			// double tmp;
@@ -272,76 +237,6 @@ public class RenderMain {
 			// if (controller.getB(ControlType.GRAVITY_CHANGE))
 			// player.toggleGravityMode();
 		}
-	}
-
-	private static class Viewport {
-		int x;
-		int y;
-		int width = 1;
-		int height = 1;
-		double fovy = 60;
-	}
-
-	private static class Window {
-
-		private static Window current;
-
-		private long window;
-
-		int gridWidth = 1;
-		int gridHeight = 1;
-
-		public Window(int width, int height, String title) {
-			GLFW.glfwDefaultWindowHints();
-			GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GL11.GL_FALSE);
-			window = GLFW.glfwCreateWindow(width, height, title, 0, 0);
-			if (window == 0) {
-				throw new RuntimeException("Failed to create the GLFW window");
-			}
-			activate();
-			GLContext.createFromCurrent();
-			GLFW.glfwSetInputMode(window, GLFW.GLFW_CURSOR, GLFW.GLFW_CURSOR_DISABLED);
-			GLFW.glfwSetKeyCallback(window, KeyboardKey.KEY_CALLBACK);
-			GLFW.glfwSetCursorPosCallback(window, CursorKey.CURSOR_CALLBACK);
-			GLFW.glfwShowWindow(window);
-			GLFW.glfwSetCursorPos(window, 0, 0);
-		}
-
-		public boolean shouldClose() {
-			return GLFW.glfwWindowShouldClose(window) != 0;
-		}
-
-		private static final IntBuffer xpos = ByteBuffer.allocateDirect(4).order(ByteOrder.nativeOrder()).asIntBuffer();
-		private static final IntBuffer ypos = ByteBuffer.allocateDirect(4).order(ByteOrder.nativeOrder()).asIntBuffer();
-
-		public void getSize(int[] buff) {
-			if (buff.length != 2)
-				throw new IllegalArgumentException();
-			xpos.position(0);
-			ypos.position(0);
-			GLFW.glfwGetWindowSize(window, xpos, ypos);
-			buff[0] = xpos.get(0);
-			buff[1] = ypos.get(0);
-		}
-
-		public void draw() {
-			GLFW.glfwSwapBuffers(window);
-		}
-
-		public void activate() {
-			if (current != this) {
-				current = this;
-				GLFW.glfwMakeContextCurrent(window);
-			}
-		}
-
-		public void dispose() {
-			if (window != 0) {
-				GLFW.glfwDestroyWindow(window);
-				window = 0;
-			}
-		}
-
 	}
 
 }
