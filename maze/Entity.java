@@ -5,7 +5,6 @@ import static math.vecmat.Vec.Vec3;
 import static math.vecmat.Vec.mixFromHighestComponents;
 
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.UUID;
 
@@ -13,7 +12,6 @@ import math.collision.Physics;
 import math.vecmat.Mat;
 import math.vecmat.Mat3;
 import math.vecmat.Vec3;
-import net.Utils;
 
 public abstract class Entity {
 
@@ -37,13 +35,7 @@ public abstract class Entity {
 		if (this.pos == null)
 			this.pos = Vec3();
 	}
-
-	public Entity(Maze m, DataInputStream dataInputStream) throws IOException {
-		this.m = m;
-		this.pos = Vec3();
-		readSync(dataInputStream);
-	}
-
+	
 	public Vec3 getPos() {
 		return pos;
 	}
@@ -215,21 +207,8 @@ public abstract class Entity {
 		return false;
 	}
 
-	public void writeSync(DataOutputStream dataOutputStream) throws IOException {
-		Utils.writeVec(dataOutputStream, this.pos);
-		Utils.writeVec(dataOutputStream, this.speed);
-		// Utils.writeVec(dataOutputStream, this.down);
-
-	}
-
 	public Gravity gravityType() {
 		return Gravity.STATIC;
-	}
-
-	public void readSync(DataInputStream dataInputStream) throws IOException {
-		Utils.readVec(dataInputStream, this.pos);
-		Utils.readVec(dataInputStream, this.speed);
-		// Utils.readVec(dataInputStream, this.down);
 	}
 
 	//public void fall(long dTime) {

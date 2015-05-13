@@ -70,14 +70,14 @@ public class RenderMain {
 		if (manager.getWindowCount() > 1)
 			manager.setPosition(1, (GLFWvidmode.width(vidmode) - WIDTH) / 2 + WIDTH / 2 + 50, (GLFWvidmode.height(vidmode) - HEIGHT) / 4);
 
-		players[0] = new PlayerData(null, new Viewport(manager, 0, 0, 0), new GameController());
+		players[0] = new PlayerData(null, manager.createViewport(0, 0, 0), new GameController());
 
 		if (players.length == 2) {
 			if (manager.getWindowCount() == 1) {
-				players[1] = new PlayerData(null, new Viewport(manager, 0, 1, 0), null);
+				players[1] = new PlayerData(null, manager.createViewport(0, 1, 0), null);
 				manager.getWindow(0).setGridWidth(2);
 			} else {
-				players[1] = new PlayerData(null, new Viewport(manager, 1, 0, 0), null);
+				players[1] = new PlayerData(null, manager.createViewport(1, 0, 0), null);
 			}
 		}
 
@@ -115,7 +115,7 @@ public class RenderMain {
 
 		manager.setupWindow(-1, Mat.asTmpBufferGL(Mat.createPerspectiveMarix(60, 800.0 / 600, 0.1, 100)));
 
-		CursorKey.setCatch(true);
+		CursorKey.setCatched(true);
 		
 		long lastNanoTime = System.nanoTime();
 		while (!shallClose && exit.getState() == 0) {
