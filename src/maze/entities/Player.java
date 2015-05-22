@@ -7,7 +7,7 @@ import maze.Gravity;
 import maze.Maze;
 import maze.effects.Explosion;
 
-public class Player extends Entity {
+public class Player extends MovingEntity {
 
 	private boolean canPlaceBomb = true;
 
@@ -25,11 +25,10 @@ public class Player extends Entity {
 
 	private double upLook;
 	
-	private Gravity currentGravityMode = Gravity.DYNAMIC;
-
 	public Player(Maze m, Vec3 pos) {
 		super(m, pos);
 		this.startPos = pos;
+		this.currentGravityMode = Gravity.DYNAMIC;
 	}
 
 	public void placeBomb() {
@@ -94,15 +93,6 @@ public class Player extends Entity {
 
 	public long getDieAni() {
 		return dieAni / 2;
-	}
-
-	@Override
-	public Gravity gravityType() {
-		return this.currentGravityMode;
-	}
-	
-	public void toggleGravityMode(){
-		this.currentGravityMode = this.currentGravityMode.toggle();
 	}
 
 	public void uplook(double d) {

@@ -8,7 +8,7 @@ import maze.Gravity;
 import maze.Maze;
 import maze.effects.Explosion;
 
-public class Bomb extends Entity {
+public class Bomb extends MovingEntity {
 
 	private Player player;
 
@@ -18,8 +18,6 @@ public class Bomb extends Entity {
 
 	private boolean exploded;
 
-	private Gravity currentGravityMode;
-	
 	public Bomb(Maze m, Vec3 pos, Mat3 rotation, Player player, double power, double time, Gravity currentGravityMode) {
 		super(m, pos);
 		this.player = player;

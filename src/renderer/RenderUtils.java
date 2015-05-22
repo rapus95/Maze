@@ -118,4 +118,9 @@ public class RenderUtils {
 		// s.draw(1, 10, 10);
 		renderCube(false);// TODO not so low poly
 	}
+	
+	public static void renderTexturedSphere(Texture t) {
+		// s.draw(1, 10, 10);
+		
+	}
 }
