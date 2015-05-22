@@ -29,7 +29,7 @@ public class RenderMain {
 
 	private boolean shallClose = false;
 
-	private WindowManager manager = new WindowManager(2);
+	private WindowManager manager = new WindowManager(1);
 
 	private PlayerData[] players = new PlayerData[2];
 
@@ -59,14 +59,15 @@ public class RenderMain {
 		int HEIGHT = 600;
 
 		for (int i = 0; i < manager.getWindowCount(); i++) {
-			manager.createWindow(i, WIDTH, HEIGHT, "Player"+(i+1));
+			manager.createWindow(i, WIDTH, HEIGHT, true, "Player"+(i+1));
 		}
 
 		// Get the resolution of the primary monitor
 		ByteBuffer vidmode = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor());
 		// Center our window
 		manager.setPosition(0, (GLFWvidmode.width(vidmode) - WIDTH) / 2 - WIDTH / 2 - 50, (GLFWvidmode.height(vidmode) - HEIGHT) / 4);
-
+		manager.setCenter(0);
+		
 		if (manager.getWindowCount() > 1)
 			manager.setPosition(1, (GLFWvidmode.width(vidmode) - WIDTH) / 2 + WIDTH / 2 + 50, (GLFWvidmode.height(vidmode) - HEIGHT) / 4);
 
@@ -74,8 +75,8 @@ public class RenderMain {
 
 		if (players.length == 2) {
 			if (manager.getWindowCount() == 1) {
-				players[1] = new PlayerData(null, manager.createViewport(0, 1, 0), null);
 				manager.getWindow(0).setGridWidth(2);
+				players[1] = new PlayerData(null, manager.createViewport(0, 1, 0), null);
 			} else {
 				players[1] = new PlayerData(null, manager.createViewport(1, 0, 0), null);
 			}
