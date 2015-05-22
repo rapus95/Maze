@@ -31,7 +31,7 @@ public class RenderMain {
 
 	private WindowManager manager = new WindowManager(1);
 
-	private PlayerData[] players = new PlayerData[2];
+	private PlayerData[] players = new PlayerData[1];
 
 	public void run() {
 		try {
@@ -59,7 +59,7 @@ public class RenderMain {
 		int HEIGHT = 600;
 
 		for (int i = 0; i < manager.getWindowCount(); i++) {
-			manager.createWindow(i, WIDTH, HEIGHT, true, "Player"+(i+1));
+			manager.createWindow(i, WIDTH, HEIGHT, false, "Player"+(i+1));
 		}
 
 		// Get the resolution of the primary monitor
