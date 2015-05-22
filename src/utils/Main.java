@@ -1,7 +1,6 @@
 package utils;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 
 import renderer.RenderMain;
 

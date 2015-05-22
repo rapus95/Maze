@@ -118,6 +118,8 @@ public class RenderMain {
 
 		CursorKey.setCatched(true);
 		
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		
 		long lastNanoTime = System.nanoTime();
 		while (!shallClose && exit.getState() == 0) {
 
