@@ -9,48 +9,67 @@ import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
+import math.vecmat.Vec;
 import math.vecmat.Vec3;
 import maze.blocks.Air;
 import maze.blocks.Wall;
 import maze.entities.Player;
-
 import static math.vecmat.Vec.*;
 
 public class Maze {
-	private final BlockData walls[][][] = new BlockData[50][50][10];
+	private final BlockData walls[][][] = new BlockData[20][20][20];
 	private Map<UUID, Entity> entities = new HashMap<>();
 	private final List<Entity> entityList = new ArrayList<>();
 	public Player currentPlayer;
 	private double nextRandomBomb = 5;
+	private static final boolean tube=false;
 
 	public Maze(int players) {
-		// entities[1] = new Player(this, tmp);
-		Maze.fillMaze(walls, Wall.INSTANCE);
-		// walls[5][5][0] = new BlockData(Wall.INSTANCE, Vec3(5, 5, 0));
-		long seed = (long) ((-Math.random() + 0.5) * 2 * Long.MAX_VALUE);// =
-																			// -1310318952414076928L;//
-		Maze.genMaze(walls, seed);
-		System.out.println(seed);
+
+		if (!tube) {
+			Maze.fillMaze(walls, Wall.INSTANCE);
+			long seed = (long) ((-Math.random() + 0.5) * 2 * Long.MAX_VALUE);// =
+																				// -1310318952414076928L;//
+
+			Maze.genMaze(walls, seed);
+			System.out.println(seed);
+		} else {
+			Maze.fillMaze(walls, Air.INSTANCE);
+			for (int i = 0; i < 10; i++) {
+				setBlock(new BlockData(Wall.INSTANCE, Vec3(0, 0, i)));
+				setBlock(new BlockData(Wall.INSTANCE, Vec3(1, 0, i)));
+				setBlock(new BlockData(Wall.INSTANCE, Vec3(2, 0, i)));
+				setBlock(new BlockData(Wall.INSTANCE, Vec3(2, 1, i)));
+				setBlock(new BlockData(Wall.INSTANCE, Vec3(2, 2, i)));
+				setBlock(new BlockData(Wall.INSTANCE, Vec3(1, 2, i)));
+				setBlock(new BlockData(Wall.INSTANCE, Vec3(0, 2, i)));
+				setBlock(new BlockData(Wall.INSTANCE, Vec3(0, 1, i)));
+				setBlock(new BlockData(Wall.INSTANCE, Vec3(0, 0, i)));
+			}
+		}
+
 		Vec3 tmp = getNonWall((int) (Math.random() * walls.length * walls[0].length * walls[0][0].length));
-		// System.out.println("here");
 		spawnEntity(currentPlayer = new Player(this, tmp));
-		for(int i=1; i<players; i++)
+		for (int i = 1; i < players; i++)
 			spawnEntity(new Player(this, tmp));
 		// System.out.println("here");
+	}
+	private void setBlock(BlockData bd) {
+		walls[(int) bd.vec.x()][(int) bd.vec.y()][(int) bd.vec.z()] = bd;
 	}
 
 	private Vec3 getNonWall(int start) {
 		Vec3 tmp;
 		int xm = walls.length;
-		int ym = xm  * walls[0].length;
-		int zm = ym  * walls[0][0].length;
+		int ym = xm * walls[0].length;
+		int zm = ym * walls[0][0].length;
 		start %= zm;
 		int c = start;
 		do {
-			int x,y,z;
-			z = c/ym;
-			y = (c-z*ym)/xm;
-			x = c-z*ym-y*xm;
+			int x, y, z;
+			z = c / ym;
+			y = (c - z * ym) / xm;
+			x = c - z * ym - y * xm;
 			if (!isWall(tmp = Vec3(x, y, z)))
 				return tmp;
 			c++;
@@ -95,17 +114,19 @@ public class Maze {
 		if (nextRandomBomb < 0) {
 			// System.out.println("bombPlaced");
 			nextRandomBomb = 5;
-			//spawnEntity(new Bomb(this, getNonWall((int) (Math.random() * 100)), null, (int) (Math.random() * 10), (int) (Math.random() * 10) + 10));
+			// spawnEntity(new Bomb(this, getNonWall((int) (Math.random() *
+			// 100)), null, (int) (Math.random() * 10), (int) (Math.random() *
+			// 10) + 10));
 		}
 		for (int i = 0; i < entityList.size(); i++) {
 			Entity e = entityList.get(i);
 			e.tick(deltaTime);
 		}
 		int size = entityList.size();
-		//for (int i = 0; i < entityList.size(); i++) {
-			//Entity e = entityList.get(i);
-			//e.fall(deltaTime);
-		//}
+		// for (int i = 0; i < entityList.size(); i++) {
+		// Entity e = entityList.get(i);
+		// e.fall(deltaTime);
+		// }
 		for (int i = 0; i < entityList.size(); i++) {
 			Entity e = entityList.get(i);
 			for (int j = i + 1; j < size; j++) {

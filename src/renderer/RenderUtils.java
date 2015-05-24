@@ -9,8 +9,6 @@ import math.vecmat.Vec3;
 
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GLContext;
-import org.lwjgl.opengl.GLDebugMessageCallback;
 
 import window.Texture;
 
@@ -51,6 +49,7 @@ public class RenderUtils {
 	}
 
 	public static void renderTexturedCube(Texture t) {
+		GL11.glColor3d(1, 1, 1);
 		Vec3 u2 = Vec3(-1, 1, 1), d2 = Vec3(-1, -1, 1), d3 = Vec3(1, -1, 1), u3 = Vec3(1, 1, 1), u1 = Vec3(-1, 1, -1), d1 = Vec3(-1, -1, -1), d4 = Vec3(1, -1,
 				-1), u4 = Vec3(1, 1, -1);
 		t.bind();
