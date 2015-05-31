@@ -10,7 +10,7 @@ import math.vecmat.Vec3;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 
-import window.Texture;
+import xor.opengl.texture.Texture;
 
 public class RenderUtils {
 
@@ -52,7 +52,7 @@ public class RenderUtils {
 		GL11.glColor3d(1, 1, 1);
 		Vec3 u2 = Vec3(-1, 1, 1), d2 = Vec3(-1, -1, 1), d3 = Vec3(1, -1, 1), u3 = Vec3(1, 1, 1), u1 = Vec3(-1, 1, -1), d1 = Vec3(-1, -1, -1), d4 = Vec3(1, -1,
 				-1), u4 = Vec3(1, 1, -1);
-		t.bind();
+		t.bind(0);
 		// UP
 		renderFaceWithTexture(u4, u1, u2, u3);
 

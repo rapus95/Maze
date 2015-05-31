@@ -4,8 +4,6 @@ import static math.vecmat.Mat.Mat3;
 import static math.vecmat.Vec.Vec3;
 import static math.vecmat.Vec.mixFromHighestComponents;
 
-import java.io.DataInputStream;
-import java.io.IOException;
 import java.util.UUID;
 
 import math.collision.Physics;
@@ -35,7 +33,7 @@ public abstract class Entity {
 		if (this.pos == null)
 			this.pos = Vec3();
 	}
-	
+
 	public Vec3 getPos() {
 		return pos;
 	}
@@ -57,12 +55,12 @@ public abstract class Entity {
 	}
 
 	public void tick(long timeDelta) {
-		if (gravityType() != Gravity.NONE){
-			this.speed.y(this.speed.y() - timeDelta / 1000_000_000d-0.1);
+		if (gravityType() != Gravity.NONE) {
+			this.speed.y(this.speed.y() - timeDelta / 1000_000_000d - 0.1);
 		}
-		pos = pos.addScaled(rotation.<Vec3>mul(speed), timeDelta / 1000_000_000d);
-		if (gravityType() != Gravity.NONE){
-			this.speed.y(this.speed.y()+0.1);
+		pos = pos.addScaled(rotation.<Vec3> mul(speed), timeDelta / 1000_000_000d);
+		if (gravityType() != Gravity.NONE) {
+			this.speed.y(this.speed.y() + 0.1);
 		}
 	}
 
@@ -100,10 +98,9 @@ public abstract class Entity {
 								shortestDistanceToRectangle(xnynzp, xpynzp, xpypzp, xnypzp), shortestDistanceToRectangle(xnynzn, xnynzp, xnypzp, xnypzn),
 								shortestDistanceToRectangle(xpynzn, xpypzn, xpypzp, xpynzp), shortestDistanceToRectangle(xnynzn, xpynzn, xpynzp, xnynzp),
 								shortestDistanceToRectangle(xnypzn, xnypzp, xpypzp, xpypzn) };
-						Vec3 nInner[] = { getNormalOnCollide(xnynzn, xnypzn, xpypzn, xpynzn),
-								getNormalOnCollide(xnynzp, xpynzp, xpypzp, xnypzp), getNormalOnCollide(xnynzn, xnynzp, xnypzp, xnypzn),
-								getNormalOnCollide(xpynzn, xpypzn, xpypzp, xpynzp), getNormalOnCollide(xnynzn, xpynzn, xpynzp, xnynzp),
-								getNormalOnCollide(xnypzn, xnypzp, xpypzp, xpypzn) };
+						Vec3 nInner[] = { getNormalOnCollide(xnynzn, xnypzn, xpypzn, xpynzn), getNormalOnCollide(xnynzp, xpynzp, xpypzp, xnypzp),
+								getNormalOnCollide(xnynzn, xnynzp, xnypzp, xnypzn), getNormalOnCollide(xpynzn, xpypzn, xpypzp, xpynzp),
+								getNormalOnCollide(xnynzn, xpynzn, xpynzp, xnynzp), getNormalOnCollide(xnypzn, xnypzp, xpypzp, xpypzn) };
 						up = up.add(Vec3.sumUp(3, nInner));
 						rOuter[3 * (3 * (i + 1) + (j + 1)) + (k + 1)] = mixFromHighestComponents(3, rInner);
 
@@ -112,7 +109,7 @@ public abstract class Entity {
 			}
 		}
 		Vec3 out = mixFromHighestComponents(3, rOuter);
-		if(!up.equals(Vec3(0, 0, 0))){
+		if (!up.equals(Vec3(0, 0, 0))) {
 			this.speed.y(0);
 			if (gravityType() == Gravity.DYNAMIC) {
 				Vec3 newDown = up.neg().normalize();
@@ -120,8 +117,8 @@ public abstract class Entity {
 				Vec3 axis = newDown.cross(down);
 				double rot = Math.toDegrees(Math.acos(newDown.dot(down)));
 				if (rot != 0 && !Double.isNaN(rot) && Math.abs(rot) < MAX_DYNAMIC_CHANGE) {
-					double maxrot = 360*dt;
-					if(rot>maxrot)
+					double maxrot = 360 * dt;
+					if (rot > maxrot)
 						rot = maxrot;
 					rotation = rotation.mul(Mat.createRotationMarix3(rot, axis.x(), axis.y(), axis.z()));
 				}
@@ -140,7 +137,7 @@ public abstract class Entity {
 		}
 		return null;
 	}
-	
+
 	private Vec3 getNormalOnCollide(Vec3 p1, Vec3 p2, Vec3 p3, Vec3 p4) {
 		double size = getSize();
 		Vec3 pos = getPos();
@@ -162,7 +159,7 @@ public abstract class Entity {
 	public void setUpSpeed(double speed) {
 		this.speed.y(speed);
 	}
-	
+
 	public Maze getMaze() {
 		return m;
 	}
@@ -211,10 +208,10 @@ public abstract class Entity {
 		return Gravity.STATIC;
 	}
 
-	//public void fall(long dTime) {
-		//if (gravityType() != Gravity.NONE)
-			//pos = pos.addScaled(getUp(), -0.981 * dTime / 1000_000_000d);
-	//}
+	// public void fall(long dTime) {
+	// if (gravityType() != Gravity.NONE)
+	// pos = pos.addScaled(getUp(), -0.981 * dTime / 1000_000_000d);
+	// }
 
 	public Vec3 getUp() {
 		return rotation.<Vec3> mul(UP);
@@ -223,6 +220,10 @@ public abstract class Entity {
 	public void rotate(double d) {
 		Vec3 up = rotation.mul(UP);
 		rotation = rotation.rotate(d, up);
+	}
+
+	public Mat3 getRotation() {
+		return rotation;
 	}
 
 }
